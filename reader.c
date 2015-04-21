@@ -66,25 +66,24 @@ char** read_osm_string_table(OSMPBF__StringTable *stringtable) {
 };
 
 
-OSMPBF__HeaderBlock* read_osm_header_block(ResizedBuffer *data){
+OSMPBF__HeaderBlock* read_osm_header_block(Cursor* cursor, ResizedBuffer* data){
     OSMPBF__HeaderBlock *header_block = osmpbf__header_block__unpack(NULL, data->size, data->data);
     printf("Count of required features: %d\n", header_block->n_required_features);
     return header_block;
 };
 
 
-void read_osm_dense_nodes(OSMPBF__DenseNodes *dense, char** strings) {
+void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings) {
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
     if (dense->n_id == 0) return;
 
     Node** nodes = malloc(sizeof(Node*) * dense->n_id);
     int i;
     for (i=0; i<dense->n_id; i++) {
-        Node* node = malloc(sizeof(Node));
+        Node* node = init_node();
         node->id = dense->id[i];
         node->lat = dense->lat[i];
         node->lon = dense->lon[i];
-        node->tags_count = 0;
         nodes[i] = node;
     };
 
@@ -107,32 +106,47 @@ void read_osm_dense_nodes(OSMPBF__DenseNodes *dense, char** strings) {
 };
 
 
-void read_osm_primitive_group(OSMPBF__PrimitiveGroup *primitive_group, char** strings) {
-    read_osm_dense_nodes(primitive_group->dense, strings);
+void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings) {
+    read_osm_dense_nodes(cursor, primitive_group->dense, strings);
 };
 
 
-read_osm_primitive_block(ResizedBuffer *data){
+void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
     OSMPBF__PrimitiveBlock* primitive_block = osmpbf__primitive_block__unpack(NULL, data->size, data->data);
     printf("Count of primitive groups: %d\n", primitive_block->n_primitivegroup);
     char** strings = read_osm_string_table(primitive_block->stringtable);
     int i;
     for (i=0; i<primitive_block->n_primitivegroup; i++) {
-        read_osm_primitive_group(primitive_block->primitivegroup[i], strings);
+        read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], strings);
     }
     free(strings);
     osmpbf__primitive_block__free_unpacked(primitive_block, NULL);
 };
 
 
-void debug_data(int index, void* data, int size) {
-    char filename[FILENAME_SIZE];
-    snprintf(filename, FILENAME_SIZE, "/tmp/res_%d", index);
+void fill_cursor(Cursor* cursor, FILE* file, short osm_header) {
+    OSMPBF__BlobHeader *header;
+    ResizedBuffer *blob_data;
 
-    printf("Write to %s\n", filename);
-    FILE *rfl = fopen(filename, "w");
-    fwrite(data, 1, size, rfl);
-    fclose(rfl);
+    // Read size of header
+    int header_size;
+    fread(&header_size, 4, 1, file);
+    header_size = ntohl(header_size);
+
+    //Read header
+    header = read_blob_header(file, header_size);
+
+    //Read blob
+    blob_data = read_blob(file, header);
+
+    if (osm_header) {
+        read_osm_header_block(cursor, blob_data);
+    } else {
+        read_osm_primitive_block(cursor, blob_data);
+    }
+
+    osmpbf__blob_header__free_unpacked(header, NULL);
+    free_resized_buffer(blob_data);
 };
 
 
@@ -141,6 +155,7 @@ void print_progress(FILE *file, int file_size) {
     printf("Progress: %d from %d\n", current_pos, file_size);
 };
 
+
 int main (int argc, const char * argv[]) {
     FILE *fl = fopen("/home/promo/Downloads/belarus-latest.osm.pbf", "r");
 
@@ -148,13 +163,9 @@ int main (int argc, const char * argv[]) {
     int file_size = ftell(fl);
     fseek(fl, 0, SEEK_SET);
 
-    OSMPBF__BlobHeader *header;
-    ResizedBuffer *blob_data;
-
     int index = 0;
-    int header_size;
     int current_pos;
-    for (index=0;index<10;index++){
+    for (index=0; index<10; index++){
         printf("Index: %d\n", index);
         print_progress(fl, file_size);
         current_pos = ftell(fl);
@@ -164,24 +175,9 @@ int main (int argc, const char * argv[]) {
             break;
         } 
 
-        // Read size of header
-        fread(&header_size, 4, 1, fl);
-        header_size = ntohl(header_size);
-        printf("Count of bytes %d\n", header_size);
-        header = read_blob_header(fl, header_size);
-
-        blob_data = read_blob(fl, header);
-        osmpbf__blob_header__free_unpacked(header, NULL);
-
-        if (index == 0) {
-            read_osm_header_block(blob_data);
-        } else {
-            read_osm_primitive_block(blob_data);
-        }
-
-        // debug_data(index, blob_data->data, blob_data->size);
-
-        free_resized_buffer(blob_data);        
+        Cursor* cursor = init_cursor();
+        fill_cursor(cursor, fl, index == 0);
+        free_cursor(cursor);
     }
 
     fclose(fl);
