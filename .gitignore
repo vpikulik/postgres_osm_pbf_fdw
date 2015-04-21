@@ -1,0 +1,3 @@
+*.o
+reader
+*.pb-c.*
