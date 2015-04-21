@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #define DEFAULT_NODES_COUNT 8000
 
 typedef struct {

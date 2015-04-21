@@ -21,14 +21,14 @@ osmformat.pb-c.o:
 zdecode.o:
 	gcc -c $(FLAGS) zdecode.c
 
-type_def.o:
-	gcc -c $(FLAGS) type_def.c
+type_defs.o:
+	gcc -c $(FLAGS) type_defs.c
 
 reader.o:
 	gcc -c $(FLAGS) reader.c
 
-reader: zdecode.o type_def.o reader.o fileformat.pb-c.o osmformat.pb-c.o
-	gcc -g -lprotobuf-c -lz -o reader reader.o type_def.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
+reader: zdecode.o type_defs.o reader.o fileformat.pb-c.o osmformat.pb-c.o
+	gcc -g -lprotobuf-c -lz -o reader reader.o type_defs.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
 
 zpipe:
 	gcc -g -lz -o zpipe zpipe.c

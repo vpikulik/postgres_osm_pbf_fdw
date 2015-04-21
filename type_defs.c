@@ -24,10 +24,10 @@ void free_node(Node* node) {
 void node_add_tag(Node* node, Tag* tag) {
     node->tags_count += 1;
     if (node->tags_count == 1) {
-        node->tags = malloc(sizeof(Tag));
+        node->tags = (Tag**)malloc(sizeof(Tag*));
     } else {
-        node->tags = realloc(node->tags, sizeof(Tag) * node->tags_count);
-    }
+        node->tags = realloc(node->tags, sizeof(Tag*) * node->tags_count);
+    };
     node->tags[node->tags_count - 1] = tag;
 };
 
@@ -46,15 +46,17 @@ void free_cursor(Cursor* cursor){
 };
 
 void cursor_add_node(Cursor* cursor, Node* node){
-    cursor->nodes_count += 1
+    cursor->nodes_count += 1;
     if (cursor->nodes_count % DEFAULT_NODES_COUNT == 0) {
         if (cursor->nodes_count == 1){
             cursor->nodes = (Node**)malloc(sizeof(Node*)*DEFAULT_NODES_COUNT);
         } else {
+            int count = cursor->nodes_count/DEFAULT_NODES_COUNT;
             cursor->nodes = realloc(
                 cursor->nodes,
-                sizeof(Node*)*DEFAULT_NODES_COUNT*(cursor->nodes_count/DEFAULT_NODES_COUNT
+                sizeof(Node*) * DEFAULT_NODES_COUNT * count
             );
-        }
-    }
+        };
+    };
+    cursor->nodes[cursor->nodes_count-1] = node;
 };

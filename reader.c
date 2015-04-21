@@ -135,6 +135,7 @@ void debug_data(int index, void* data, int size) {
     fclose(rfl);
 };
 
+
 void print_progress(FILE *file, int file_size) {
     int current_pos = ftell(file);
     printf("Progress: %d from %d\n", current_pos, file_size);
