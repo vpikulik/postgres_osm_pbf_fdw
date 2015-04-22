@@ -15,8 +15,6 @@ OSMPBF__BlobHeader* read_blob_header(FILE *file, int header_size) {
     fread(buf, header_size, 1, file);
     OSMPBF__BlobHeader *header;
     header = osmpbf__blob_header__unpack(NULL, header_size, buf);
-    printf("type: %s\n", header->type);
-    printf("datasize: %d\n", header->datasize);
     free(buf);
 
     return header;
@@ -55,7 +53,6 @@ ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header) {
 
 
 char** read_osm_string_table(OSMPBF__StringTable *stringtable) {
-    printf("Table size: %d\n", stringtable->n_s);
     char** strings = malloc(sizeof(char*) * stringtable->n_s);
     int i;
     for (i=0; i<stringtable->n_s; i++) {
@@ -85,6 +82,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         node->lat = dense->lat[i];
         node->lon = dense->lon[i];
         nodes[i] = node;
+        cursor_add_node(cursor, node);
     };
 
     i = 0;
@@ -97,12 +95,13 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         } else {
             int32_t val_index = dense->keys_vals[i+1];
             i += 2;
-            Tag* tag = malloc(sizeof(Tag));
+            Tag* tag = (Tag*)malloc(sizeof(Tag));
             tag->key = strings[key_index];
             tag->value = strings[val_index];
             node_add_tag(nodes[node_index], tag);
         }
     } while (i < dense->n_keys_vals);
+    free(nodes);
 };
 
 
@@ -165,7 +164,7 @@ int main (int argc, const char * argv[]) {
 
     int index = 0;
     int current_pos;
-    for (index=0; index<10; index++){
+    for (index=0; index<1000; index++){
         printf("Index: %d\n", index);
         print_progress(fl, file_size);
         current_pos = ftell(fl);
@@ -173,7 +172,7 @@ int main (int argc, const char * argv[]) {
         if (current_pos >= file_size) {
             printf("Enf of file\n");
             break;
-        } 
+        }
 
         Cursor* cursor = init_cursor();
         fill_cursor(cursor, fl, index == 0);

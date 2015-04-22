@@ -3,8 +3,8 @@
 
 
 void free_tag(Tag* tag) {
-    free(tag->key);
-    free(tag->value);
+    // free(tag->key);
+    // free(tag->value);
     free(tag);
 };
 
@@ -19,6 +19,7 @@ void free_node(Node* node) {
     for (i=0;i<node->tags_count;i++) {
         free_tag(node->tags[i]);
     };
+    free(node);
 };
 
 void node_add_tag(Node* node, Tag* tag) {
@@ -46,17 +47,17 @@ void free_cursor(Cursor* cursor){
 };
 
 void cursor_add_node(Cursor* cursor, Node* node){
-    cursor->nodes_count += 1;
     if (cursor->nodes_count % DEFAULT_NODES_COUNT == 0) {
-        if (cursor->nodes_count == 1){
+        if (cursor->nodes_count == 0){
             cursor->nodes = (Node**)malloc(sizeof(Node*)*DEFAULT_NODES_COUNT);
         } else {
-            int count = cursor->nodes_count/DEFAULT_NODES_COUNT;
+            int count = (cursor->nodes_count+1)/DEFAULT_NODES_COUNT;
             cursor->nodes = realloc(
                 cursor->nodes,
                 sizeof(Node*) * DEFAULT_NODES_COUNT * count
             );
         };
     };
+    cursor->nodes_count += 1;
     cursor->nodes[cursor->nodes_count-1] = node;
 };
