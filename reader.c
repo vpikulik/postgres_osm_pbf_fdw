@@ -4,7 +4,8 @@
 #include "fileformat.pb-c.h"
 #include "osmformat.pb-c.h"
 
-#include "type_defs.h"
+// #include "type_defs.h"
+#include "json_encode.h"
 #include "zdecode.h"
 
 #define FILENAME_SIZE 11
@@ -106,7 +107,9 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
 
 
 void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings) {
-    read_osm_dense_nodes(cursor, primitive_group->dense, strings);
+    if (primitive_group->dense) {
+        read_osm_dense_nodes(cursor, primitive_group->dense, strings);
+    };
 };
 
 
@@ -157,6 +160,7 @@ void print_progress(FILE *file, int file_size) {
 
 int main (int argc, const char * argv[]) {
     FILE *fl = fopen("/home/promo/Downloads/belarus-latest.osm.pbf", "r");
+    FILE *out = fopen("/tmp/out.json", "w");
 
     fseek(fl, 0, SEEK_END);
     int file_size = ftell(fl);
@@ -164,20 +168,31 @@ int main (int argc, const char * argv[]) {
 
     int index = 0;
     int current_pos;
-    for (index=0; index<1000; index++){
+    for (index=0; index<3; index++){
         printf("Index: %d\n", index);
         print_progress(fl, file_size);
         current_pos = ftell(fl);
 
         if (current_pos >= file_size) {
-            printf("Enf of file\n");
+            printf("End of file\n");
             break;
         }
 
         Cursor* cursor = init_cursor();
         fill_cursor(cursor, fl, index == 0);
+
+        int i;
+        for(i=0; i<cursor->nodes_count; i++) {
+            Node* node = cursor->nodes[i];
+            json_t* jnode = encode_node(node);
+            char* out_str = encode_json(jnode);
+            fputs(out_str, out);
+            fputs("\n", out);
+        }
+
         free_cursor(cursor);
     }
 
     fclose(fl);
+    fclose(out);
 }
