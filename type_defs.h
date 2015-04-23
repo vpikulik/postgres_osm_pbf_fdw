@@ -12,8 +12,8 @@ typedef struct {
 
 typedef struct {
     int64_t id;
-    int64_t lat;
-    int64_t lon;
+    double lat;
+    double lon;
     int32_t tags_count;
     Tag** tags;
 } Node;

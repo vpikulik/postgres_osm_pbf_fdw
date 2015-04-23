@@ -11,8 +11,8 @@ json_t* encode_tag(Tag* tag) {
 json_t* encode_node(Node* node) {
     json_t* jnode = json_object();
     json_object_set(jnode, "id", json_integer(node->id));
-    json_object_set(jnode, "lat", json_integer(node->lat));
-    json_object_set(jnode, "lon", json_integer(node->lon));
+    json_object_set(jnode, "lat", json_real(node->lat));
+    json_object_set(jnode, "lon", json_real(node->lon));
 
     if (node->tags_count > 0) {
         json_t* jtags = json_object();

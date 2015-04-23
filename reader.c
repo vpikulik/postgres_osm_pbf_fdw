@@ -74,17 +74,58 @@ OSMPBF__HeaderBlock* read_osm_header_block(Cursor* cursor, ResizedBuffer* data){
 };
 
 
-void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings) {
+double get_lat(int64_t lat, OSMPBF__PrimitiveBlock* primitive_block){
+    int64_t lat_offset;
+    int32_t granularity;
+    if (primitive_block->has_lat_offset) {
+        lat_offset = primitive_block->has_lat_offset;
+    } else {
+        lat_offset = 0;
+    };
+    if (primitive_block->has_granularity) {
+        granularity = primitive_block->granularity;
+    } else {
+        granularity = 1;
+    };
+    return .000000001 * (lat_offset + (granularity * lat));
+};
+
+
+double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block){
+    int64_t lon_offset;
+    int32_t granularity;
+    if (primitive_block->has_lon_offset) {
+        lon_offset = primitive_block->has_lon_offset;
+    } else {
+        lon_offset = 0;
+    };
+    if (primitive_block->has_granularity) {
+        granularity = primitive_block->granularity;
+    } else {
+        granularity = 1;
+    };
+    return .000000001 * (lon_offset + (granularity * lon));
+};
+
+
+void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
     if (dense->n_id == 0) return;
 
     Node** nodes = malloc(sizeof(Node*) * dense->n_id);
     int i;
+    int64_t id = 0;
+    int64_t lat = 0;
+    int64_t lon = 0;
     for (i=0; i<dense->n_id; i++) {
+        id = id + dense->id[i];
+        lat = lat + dense->lat[i];
+        lon = lon + dense->lon[i];
+
         Node* node = init_node();
-        node->id = dense->id[i];
-        node->lat = dense->lat[i];
-        node->lon = dense->lon[i];
+        node->id = id;
+        node->lat = get_lat(lat, primitive_block);
+        node->lon = get_lon(lon, primitive_block);
         nodes[i] = node;
         cursor_add_node(cursor, node);
     };
@@ -109,9 +150,9 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
 };
 
 
-void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings) {
+void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
     if (primitive_group->dense) {
-        read_osm_dense_nodes(cursor, primitive_group->dense, strings);
+        read_osm_dense_nodes(cursor, primitive_group->dense, strings, primitive_block);
     };
 };
 
@@ -122,7 +163,7 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
     char** strings = read_osm_string_table(primitive_block->stringtable);
     int i;
     for (i=0; i<primitive_block->n_primitivegroup; i++) {
-        read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], strings);
+        read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], strings, primitive_block);
     }
     free(strings);
     osmpbf__primitive_block__free_unpacked(primitive_block, NULL);
