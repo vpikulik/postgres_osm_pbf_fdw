@@ -13,14 +13,13 @@ json_t* encode_node(Node* node) {
     json_object_set(jnode, "id", json_integer(node->id));
     json_object_set(jnode, "lat", json_integer(node->lat));
     json_object_set(jnode, "lon", json_integer(node->lon));
-    json_object_set(jnode, "data", json_string("string_data"));
 
     if (node->tags_count > 0) {
-        json_t* jtags = json_array();
+        json_t* jtags = json_object();
         int i;
         for (i=0; i<node->tags_count; i++) {
             Tag* tag = node->tags[i];
-            json_array_append(jtags, encode_tag(tag));
+            json_object_set(jtags, tag->key, json_string(tag->value));
         };
         json_object_set(jnode, "tags", jtags);
     };
@@ -28,5 +27,5 @@ json_t* encode_node(Node* node) {
 };
 
 char* encode_json(json_t* obj) {
-    return json_dumps(obj, 0);
+    return json_dumps(obj, JSON_INDENT(4));
 };

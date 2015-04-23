@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fileformat.pb-c.h"
 #include "osmformat.pb-c.h"
@@ -58,7 +59,9 @@ char** read_osm_string_table(OSMPBF__StringTable *stringtable) {
     int i;
     for (i=0; i<stringtable->n_s; i++) {
         ProtobufCBinaryData item = stringtable->s[i];
-        strings[i] = (char*) item.data;
+        char* str = (char*) calloc(item.len + 1, sizeof(char));
+        memcpy(str, item.data, item.len);
+        strings[i] = str;
     }
     return strings;
 };
