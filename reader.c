@@ -34,7 +34,7 @@ int main (int argc, const char * argv[]) {
 
         int i;
         for(i=0; i<cursor->nodes_count; i++) {
-            Node* node = cursor->nodes[i];
+            OsmNode* node = cursor->nodes[i];
             json_t* jnode = encode_node(node);
             char* out_str = encode_json(jnode);
             fputs(out_str, out);

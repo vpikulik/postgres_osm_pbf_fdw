@@ -7,7 +7,7 @@
 typedef struct {
     char* key;
     char* value;
-} Tag;
+} OsmTag;
 
 
 typedef struct {
@@ -15,21 +15,21 @@ typedef struct {
     double lat;
     double lon;
     int32_t tags_count;
-    Tag** tags;
-} Node;
+    OsmTag** tags;
+} OsmNode;
 
 
 typedef struct {
     int nodes_count;
-    Node** nodes;
+    OsmNode** nodes;
 } Cursor;
 
 
-Node* init_node();
-void free_node(Node* node);
-void node_add_tag(Node* node, Tag* tag);
+OsmNode* init_node();
+void free_node(OsmNode* node);
+void node_add_tag(OsmNode* node, OsmTag* tag);
 
 
 Cursor* init_cursor();
 void free_cursor(Cursor* cursor);
-void cursor_add_node(Cursor* cursor, Node* node);
+void cursor_add_node(Cursor* cursor, OsmNode* node);

@@ -2,19 +2,19 @@
 #include "type_defs.h"
 
 
-void free_tag(Tag* tag) {
+void free_tag(OsmTag* tag) {
     // free(tag->key);
     // free(tag->value);
     free(tag);
 };
 
-Node* init_node() {
-    Node* node = (Node*)malloc(sizeof(Node));
+OsmNode* init_node() {
+    OsmNode* node = (OsmNode*)malloc(sizeof(OsmNode));
     node->tags_count = 0;
     return node;
 };
 
-void free_node(Node* node) {
+void free_node(OsmNode* node) {
     int i;
     for (i=0;i<node->tags_count;i++) {
         free_tag(node->tags[i]);
@@ -22,12 +22,12 @@ void free_node(Node* node) {
     free(node);
 };
 
-void node_add_tag(Node* node, Tag* tag) {
+void node_add_tag(OsmNode* node, OsmTag* tag) {
     node->tags_count += 1;
     if (node->tags_count == 1) {
-        node->tags = (Tag**)malloc(sizeof(Tag*));
+        node->tags = (OsmTag**)malloc(sizeof(OsmTag*));
     } else {
-        node->tags = realloc(node->tags, sizeof(Tag*) * node->tags_count);
+        node->tags = realloc(node->tags, sizeof(OsmTag*) * node->tags_count);
     };
     node->tags[node->tags_count - 1] = tag;
 };
@@ -46,15 +46,15 @@ void free_cursor(Cursor* cursor){
     free(cursor);
 };
 
-void cursor_add_node(Cursor* cursor, Node* node){
+void cursor_add_node(Cursor* cursor, OsmNode* node){
     if (cursor->nodes_count % DEFAULT_NODES_COUNT == 0) {
         if (cursor->nodes_count == 0){
-            cursor->nodes = (Node**)malloc(sizeof(Node*)*DEFAULT_NODES_COUNT);
+            cursor->nodes = (OsmNode**)malloc(sizeof(OsmNode*)*DEFAULT_NODES_COUNT);
         } else {
             int count = (cursor->nodes_count+1)/DEFAULT_NODES_COUNT;
             cursor->nodes = realloc(
                 cursor->nodes,
-                sizeof(Node*) * DEFAULT_NODES_COUNT * count
+                sizeof(OsmNode*) * DEFAULT_NODES_COUNT * count
             );
         };
     };

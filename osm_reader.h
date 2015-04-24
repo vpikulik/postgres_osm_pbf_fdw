@@ -5,6 +5,7 @@
 #include "fileformat.pb-c.h"
 #include "osmformat.pb-c.h"
 
+// #include "type_defs.h"
 #include "json_encode.h"
 #include "zdecode.h"
 

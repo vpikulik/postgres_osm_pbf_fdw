@@ -2,13 +2,13 @@
 #include "json_encode.h"
 
 
-json_t* encode_tag(Tag* tag) {
+json_t* encode_tag(OsmTag* tag) {
     json_t* jtag = json_object();
     json_object_set(jtag, tag->key, json_string(tag->value));
     return jtag;
 };
 
-json_t* encode_node(Node* node) {
+json_t* encode_node(OsmNode* node) {
     json_t* jnode = json_object();
     json_object_set(jnode, "id", json_integer(node->id));
     json_object_set(jnode, "lat", json_real(node->lat));
@@ -18,7 +18,7 @@ json_t* encode_node(Node* node) {
         json_t* jtags = json_object();
         int i;
         for (i=0; i<node->tags_count; i++) {
-            Tag* tag = node->tags[i];
+            OsmTag* tag = node->tags[i];
             json_object_set(jtags, tag->key, json_string(tag->value));
         };
         json_object_set(jnode, "tags", jtags);

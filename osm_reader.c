@@ -102,7 +102,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
     if (dense->n_id == 0) return;
 
-    Node** nodes = malloc(sizeof(Node*) * dense->n_id);
+    OsmNode** nodes = malloc(sizeof(OsmNode*) * dense->n_id);
     int i;
     int64_t id = 0;
     int64_t lat = 0;
@@ -112,7 +112,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         lat = lat + dense->lat[i];
         lon = lon + dense->lon[i];
 
-        Node* node = init_node();
+        OsmNode* node = init_node();
         node->id = id;
         node->lat = get_lat(lat, primitive_block);
         node->lon = get_lon(lon, primitive_block);
@@ -130,7 +130,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         } else {
             int32_t val_index = dense->keys_vals[i+1];
             i += 2;
-            Tag* tag = (Tag*)malloc(sizeof(Tag));
+            OsmTag* tag = (OsmTag*)malloc(sizeof(OsmTag));
             tag->key = strings[key_index];
             tag->value = strings[val_index];
             node_add_tag(nodes[node_index], tag);
