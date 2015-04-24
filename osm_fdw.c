@@ -115,25 +115,27 @@ IterateForeignScan (ForeignScanState *node){
 
     // columns: id, type, lat, lon, tags
 
-    slot->tts_values[0] = PointerGetDatum(NULL);
+    slot->tts_values[0] = Int64GetDatum(&(osm_node->id));
     slot->tts_isnull[0] = false;
 
-    slot->tts_values[1] = PointerGetDatum(NULL);
+    text *type_name = cstring_to_text("Node");
+    slot->tts_values[1] = PointerGetDatum(type_name);
     slot->tts_isnull[1] = false;
 
     slot->tts_values[2] = PointerGetDatum(NULL);
-    slot->tts_isnull[2] = false;
+    slot->tts_isnull[2] = true;
 
     slot->tts_values[3] = PointerGetDatum(NULL);
-    slot->tts_isnull[3] = false;
+    slot->tts_isnull[3] = true;
 
     slot->tts_values[4] = PointerGetDatum(NULL);
-    slot->tts_isnull[4] = false;
+    slot->tts_isnull[4] = true;
 
 
     state->cursor_position += 1;
     if (state->cursor_position >= state->cursor->nodes_count) {
         state->cursor_position = 0;
+        state->cursor_index += 1;
         free_cursor(state->cursor);
     }
 
@@ -193,7 +195,8 @@ ReScanForeignScan (ForeignScanState *node) {
 
 void
 EndForeignScan (ForeignScanState *node) {
-
+    FdwExecutionState *state = node->fdw_state;
+    fclose(state->file);
 };
 
 Datum
