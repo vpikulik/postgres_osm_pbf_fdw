@@ -14,6 +14,7 @@ PG_MODULE_MAGIC;
 
 
 #include "osm_reader.h"
+#include "json_encode.h"
 
 #define ROWS_COUNT 8000*1000
 
@@ -115,21 +116,31 @@ IterateForeignScan (ForeignScanState *node){
 
     // columns: id, type, lat, lon, tags
 
-    slot->tts_values[0] = Int64GetDatum(&(osm_node->id));
+    int64 p_id = (int64)osm_node->id;
+    slot->tts_values[0] = Int64GetDatum(p_id);
     slot->tts_isnull[0] = false;
 
     text *type_name = cstring_to_text("Node");
     slot->tts_values[1] = PointerGetDatum(type_name);
     slot->tts_isnull[1] = false;
 
-    slot->tts_values[2] = PointerGetDatum(NULL);
-    slot->tts_isnull[2] = true;
+    float8 p_lat = (float8)osm_node->lat;
+    slot->tts_values[2] = Float8GetDatum(p_lat);
+    slot->tts_isnull[2] = false;
 
-    slot->tts_values[3] = PointerGetDatum(NULL);
-    slot->tts_isnull[3] = true;
+    float8 p_lon = (float8)osm_node->lon;
+    slot->tts_values[3] = Float8GetDatum(p_lon);
+    slot->tts_isnull[3] = false;
 
-    slot->tts_values[4] = PointerGetDatum(NULL);
-    slot->tts_isnull[4] = true;
+    if (osm_node->tags_count > 0) {
+        json_object* jtags = encode_tags(osm_node);
+        text *tags_json = cstring_to_text(encode_json(jtags));
+        slot->tts_values[4] = PointerGetDatum(tags_json);
+        slot->tts_isnull[4] = false;
+    } else {
+        slot->tts_values[4] = PointerGetDatum(NULL);
+        slot->tts_isnull[4] = true;
+    }
 
 
     state->cursor_position += 1;
@@ -140,47 +151,6 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     return ExecStoreVirtualTuple(slot);
-
-
-    // // 0 columnt (P:Int4 - C:Int32)
-    // int32 value_0 = (int32) state->current_index + 10;
-    // slot->tts_values[0] = Int32GetDatum(value_0);
-    // slot->tts_isnull[0] = false;
-
-    // // 1 column (P:text - C:text*)
-    // text *value_1 = cstring_to_text("abcdefg");
-    // slot->tts_values[1] = PointerGetDatum(value_1);
-    // slot->tts_isnull[1] = false;
-
-    // // 2 column (Int32 array)
-    // int values_count = state->current_index;
-    // int i;
-    // Datum *values_2 = (Datum*) palloc(sizeof(Datum)*values_count);
-    // for (i=0;i<values_count;i++) {
-    //     int32 array_item = i*i;
-    //     values_2[i] = Int32GetDatum(array_item);
-    // }
-    // ArrayType *value_2 = construct_array(values_2, values_count, INT4OID, sizeof(int32), true, 'i');
-    // slot->tts_values[2] = PointerGetDatum(value_2);
-    // slot->tts_isnull[2] = false;
-
-    // // 3 column (text array)
-    // Datum *values_3 = (Datum*) palloc(sizeof(Datum)*values_count);
-    // for (i=0;i<values_count;i++) {
-    //     text *array_item = cstring_to_text("abcdefg");
-    //     values_3[i] = PointerGetDatum(array_item);
-    // }
-    // ArrayType *value_3 = construct_array(values_3, values_count, TEXTOID, -1, true, 'i');
-    // slot->tts_values[3] = PointerGetDatum(value_3);
-    // slot->tts_isnull[3] = false;
-
-    // // 4 column (json)
-    // text *value_4 = cstring_to_text("{\"a\": \"b\"}");
-    // slot->tts_values[4] = PointerGetDatum(value_4);
-    // slot->tts_isnull[4] = false;
-
-    // state->current_index += 1;
-    
 };
 
 void

@@ -2,10 +2,10 @@
 CURRENT_FOLDER = $(shell pwd)
 
 POSTGRES_FLAGS = -I `pg_config --includedir-server`
-FLAGS = -g -fpic -lz -lprotobuf-c
+FLAGS = -g -fpic -lz -lprotobuf-c -ljson-c `pkg-config --cflags json-c`
 
-EXTENSIONS_FOLDER = /usr/share/postgresql/9.3/extension
-LIB_FOLDER = /usr/lib/postgresql/9.3/lib
+EXTENSIONS_FOLDER = `pg_config --sharedir`/extension
+LIB_FOLDER = `pg_config --pkglibdir`
 
 all: clean prepare_proto osm_fdw.so
 
@@ -44,7 +44,7 @@ osm_fdw.o:
 	gcc -c $(FLAGS) $(POSTGRES_FLAGS) osm_fdw.c
 
 osm_fdw.so: osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
-	gcc -shared -fpic -dynamic -ljansson -lz -lprotobuf-c -o osm_fdw.so osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
+	gcc -shared -fpic -dynamic $(FLAGS) -o osm_fdw.so osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
 
 zpipe:
 	gcc -g -lz -o zpipe zpipe.c
