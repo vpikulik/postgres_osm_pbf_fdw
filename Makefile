@@ -1,8 +1,9 @@
 
 CURRENT_FOLDER = $(shell pwd)
 
-POSTGRES_FLAGS = -I `pg_config --includedir-server`
-FLAGS = -g -fpic -lz -lprotobuf-c -ljson-c `pkg-config --cflags json-c`
+CFLAGS = `pkg-config --cflags json-c` -I`pg_config --includedir-server` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags zlib`
+LDFLAGS = `pkg-config --libs json-c` `pkg-config --libs libprotobuf-c` `pkg-config --libs zlib`
+OFLAGS = -g -fpic $(CFLAGS)
 
 EXTENSIONS_FOLDER = `pg_config --sharedir`/extension
 LIB_FOLDER = `pg_config --pkglibdir`
@@ -17,34 +18,34 @@ prepare_proto:
 	protoc-c --c_out=$(CURRENT_FOLDER) osmformat.proto
 
 fileformat.pb-c.o:
-	gcc -c $(FLAGS) fileformat.pb-c.c
+	gcc -c $(OFLAGS) fileformat.pb-c.c
 
 osmformat.pb-c.o:
-	gcc -c $(FLAGS) osmformat.pb-c.c
+	gcc -c $(OFLAGS) osmformat.pb-c.c
 
 zdecode.o:
-	gcc -c $(FLAGS) zdecode.c
+	gcc -c $(OFLAGS) zdecode.c
 
 type_defs.o:
-	gcc -c $(FLAGS) type_defs.c
+	gcc -c $(OFLAGS) type_defs.c
 
 json_encode.o:
-	gcc -c $(FLAGS) json_encode.c
+	gcc -c $(OFLAGS) json_encode.c
 
 osm_reader.o:
-	gcc -c $(FLAGS) osm_reader.c
+	gcc -c $(OFLAGS) osm_reader.c
 
 reader.o:
-	gcc -c $(FLAGS) reader.c
+	gcc -c $(OFLAGS) reader.c
 
 reader: zdecode.o type_defs.o json_encode.o reader.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
 	gcc -g -lprotobuf-c -lz -ljansson -o reader reader.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
 
 osm_fdw.o:
-	gcc -c $(FLAGS) $(POSTGRES_FLAGS) osm_fdw.c
+	gcc -c $(OFLAGS) osm_fdw.c
 
 osm_fdw.so: osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
-	gcc -shared -fpic -dynamic $(FLAGS) -o osm_fdw.so osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
+	gcc -shared -fpic -dynamic $(LDFLAGS) -o osm_fdw.so osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
 
 zpipe:
 	gcc -g -lz -o zpipe zpipe.c
