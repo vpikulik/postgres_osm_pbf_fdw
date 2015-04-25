@@ -1,4 +1,7 @@
 
+#ifndef TYPE_DEFS_INCLUDED
+#define TYPE_DEFS_INCLUDED
+
 #include <stdlib.h>
 
 #define DEFAULT_NODES_COUNT 8000
@@ -33,3 +36,5 @@ void node_add_tag(OsmNode* node, OsmTag* tag);
 Cursor* init_cursor();
 void free_cursor(Cursor* cursor);
 void cursor_add_node(Cursor* cursor, OsmNode* node);
+
+#endif

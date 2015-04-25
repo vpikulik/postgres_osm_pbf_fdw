@@ -7,7 +7,7 @@ FLAGS = -g -fpic -lz -lprotobuf-c
 EXTENSIONS_FOLDER = /usr/share/postgresql/9.3/extension
 LIB_FOLDER = /usr/lib/postgresql/9.3/lib
 
-all: clean prepare_proto reader osm_fdw.so
+all: clean prepare_proto osm_fdw.so
 
 clean:
 	rm -rf *.pb-c.* *.o *.so reader zpipe out.res
