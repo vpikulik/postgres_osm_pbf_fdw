@@ -1,4 +1,7 @@
 
+#ifndef OSM_READER_INCLUDED
+#define OSM_READER_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +10,6 @@
 #include "osmformat.pb-c.h"
 
 #include "type_defs.h"
-// #include "json_encode.h"
 #include "zdecode.h"
 
 
@@ -20,4 +22,8 @@ double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data);
-void fill_cursor(Cursor* cursor, FILE* file, short osm_header);
+
+void read_osm_header(Cursor* cursor, FILE* file);
+OsmItem* read_osm_item(Cursor* cursor, FILE* file);
+
+#endif

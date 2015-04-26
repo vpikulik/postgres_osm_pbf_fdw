@@ -1,6 +1,8 @@
 #include <stdio.h>
 
+#include "type_defs.h"
 #include "osm_reader.h"
+#include "json_encode.h"
 
 
 void print_progress(FILE *file, int file_size) {
@@ -19,30 +21,22 @@ int main (int argc, const char * argv[]) {
 
     int index = 0;
     int current_pos;
-    for (index=0; index<3; index++){
-        printf("Index: %d\n", index);
-        print_progress(fl, file_size);
-        current_pos = ftell(fl);
+    Cursor* cursor = alloc_cursor();
+    clear_cursor(cursor);
+    read_osm_header(cursor, fl);
 
-        if (current_pos >= file_size) {
-            printf("End of file\n");
-            break;
-        }
-
-        Cursor* cursor = init_cursor();
-        fill_cursor(cursor, fl, index == 0);
-
-        int i;
-        for(i=0; i<cursor->nodes_count; i++) {
-            OsmNode* node = cursor->nodes[i];
-            json_t* jnode = encode_node(node);
-            char* out_str = encode_json(jnode);
-            fputs(out_str, out);
+    OsmItem* item;
+    do {
+        item = read_osm_item(cursor, fl);
+        if (item) {
+            const char* json_item_txt = encode_json(encode_item(item));
+            fputs(json_item_txt, out);
             fputs("\n", out);
         }
+        index += 1;
+    } while (item != NULL && index < 5);
 
-        free_cursor(cursor);
-    }
+    free_cursor(cursor);
 
     fclose(fl);
     fclose(out);

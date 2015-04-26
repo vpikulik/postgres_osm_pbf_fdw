@@ -102,7 +102,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
     if (dense->n_id == 0) return;
 
-    OsmNode** nodes = malloc(sizeof(OsmNode*) * dense->n_id);
+    OsmItem** items = malloc(sizeof(OsmItem*) * dense->n_id);
     int i;
     int64_t id = 0;
     int64_t lat = 0;
@@ -112,31 +112,31 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         lat = lat + dense->lat[i];
         lon = lon + dense->lon[i];
 
-        OsmNode* node = init_node();
-        node->id = id;
-        node->lat = get_lat(lat, primitive_block);
-        node->lon = get_lon(lon, primitive_block);
-        nodes[i] = node;
-        cursor_add_node(cursor, node);
+        OsmItem* item = init_item();
+        item->id = id;
+        item->lat = get_lat(lat, primitive_block);
+        item->lon = get_lon(lon, primitive_block);
+        items[i] = item;
+        cursor_add_item(cursor, item);
     };
 
     i = 0;
-    int node_index = 0;
+    int item_index = 0;
     do {
         int32_t key_index = dense->keys_vals[i];
         if (key_index == 0) {
             i += 1;
-            node_index += 1;
+            item_index += 1;
         } else {
             int32_t val_index = dense->keys_vals[i+1];
             i += 2;
             OsmTag* tag = (OsmTag*)malloc(sizeof(OsmTag));
             tag->key = strings[key_index];
             tag->value = strings[val_index];
-            node_add_tag(nodes[node_index], tag);
+            item_add_tag(items[item_index], tag);
         }
     } while (i < dense->n_keys_vals);
-    free(nodes);
+    free(items);
 };
 
 
@@ -160,22 +160,19 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
 };
 
 
-void fill_cursor(Cursor* cursor, FILE* file, short osm_header) {
-    OSMPBF__BlobHeader *header;
-    ResizedBuffer *blob_data;
-
+void _load_data_from_file(Cursor* cursor, FILE* file, short read_header) {
     // Read size of header
     int header_size;
     fread(&header_size, 4, 1, file);
     header_size = ntohl(header_size);
 
     //Read header
-    header = read_blob_header(file, header_size);
+    OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
 
     //Read blob
-    blob_data = read_blob(file, header);
+    ResizedBuffer* blob_data = read_blob(file, header);
 
-    if (osm_header) {
+    if (read_header) {
         read_osm_header_block(cursor, blob_data);
     } else {
         read_osm_primitive_block(cursor, blob_data);
@@ -184,3 +181,31 @@ void fill_cursor(Cursor* cursor, FILE* file, short osm_header) {
     osmpbf__blob_header__free_unpacked(header, NULL);
     free_resized_buffer(blob_data);
 };
+
+
+void read_osm_header(Cursor* cursor, FILE* file) {
+    _load_data_from_file(cursor, file, 1);
+}
+
+
+OsmItem* read_osm_item(Cursor* cursor, FILE* file) {
+    if (cursor->position == -1) {
+        do {
+            _load_data_from_file(cursor, file, 0);
+        } while (cursor->items_count == 0 && !feof(file));
+        cursor->position = 0;
+    }
+
+    if (cursor->items_count == 0) {
+        return NULL;
+    }
+
+    if (cursor->position < cursor->items_count - 1) {
+        OsmItem* item = cursor->items[cursor->position];
+        cursor->position ++;
+        if (cursor->position >= cursor->items_count - 1) {
+            clear_cursor(cursor);
+        }
+        return item;
+    }
+}

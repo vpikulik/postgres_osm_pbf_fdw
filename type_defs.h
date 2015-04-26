@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-#define DEFAULT_NODES_COUNT 8000
+#define DEFAULT_ITEMS_COUNT 8000
 
 
 typedef struct {
@@ -19,22 +19,25 @@ typedef struct {
     double lon;
     int32_t tags_count;
     OsmTag** tags;
-} OsmNode;
+} OsmItem;
 
 
 typedef struct {
-    int nodes_count;
-    OsmNode** nodes;
+    int position;
+    int items_count;
+    OsmItem** items;
 } Cursor;
 
 
-OsmNode* init_node();
-void free_node(OsmNode* node);
-void node_add_tag(OsmNode* node, OsmTag* tag);
+OsmItem* init_item();
+void free_item(OsmItem* item);
+void item_add_tag(OsmItem* node, OsmTag* tag);
 
 
-Cursor* init_cursor();
+Cursor* alloc_cursor();
+void clear_cursor(Cursor* cursor);
 void free_cursor(Cursor* cursor);
-void cursor_add_node(Cursor* cursor, OsmNode* node);
+void free_cursor_items(Cursor* cursor);
+void cursor_add_item(Cursor* cursor, OsmItem* item);
 
 #endif

@@ -2,27 +2,27 @@
 #include "json_encode.h"
 
 
-json_object* encode_tags(OsmNode* node) {
+json_object* encode_tags(OsmItem* item) {
     json_object * jtags = json_object_new_object();
     int i;
-    for (i=0; i<node->tags_count; i++) {
-        OsmTag* tag = node->tags[i];
+    for (i=0; i<item->tags_count; i++) {
+        OsmTag* tag = item->tags[i];
         json_object_object_add(jtags, tag->key, json_object_new_string(tag->value));
     };
     return jtags;
 };
 
-json_object* encode_node(OsmNode* node) {
-    json_object* jnode = json_object_new_object();
-    json_object_object_add(jnode, "id", json_object_new_int(node->id));
-    json_object_object_add(jnode, "lat", json_object_new_double(node->lat));
-    json_object_object_add(jnode, "lon", json_object_new_double(node->lon));
+json_object* encode_item(OsmItem* item) {
+    json_object* jitem = json_object_new_object();
+    json_object_object_add(jitem, "id", json_object_new_int(item->id));
+    json_object_object_add(jitem, "lat", json_object_new_double(item->lat));
+    json_object_object_add(jitem, "lon", json_object_new_double(item->lon));
 
-    if (node->tags_count > 0) {
-        json_object* jtags = encode_tags(node);
-        json_object_object_add(jnode, "tags", jtags);
+    if (item->tags_count > 0) {
+        json_object* jtags = encode_tags(item);
+        json_object_object_add(jitem, "tags", jtags);
     };
-    return jnode;
+    return jitem;
 };
 
 const char* encode_json(json_object* jobj) {

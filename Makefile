@@ -8,7 +8,7 @@ OFLAGS = -g -fpic $(CFLAGS)
 EXTENSIONS_FOLDER = `pg_config --sharedir`/extension
 LIB_FOLDER = `pg_config --pkglibdir`
 
-all: clean prepare_proto osm_fdw.so
+all: clean osm_fdw.so
 
 clean:
 	rm -rf *.pb-c.* *.o *.so reader zpipe out.res
@@ -17,10 +17,10 @@ prepare_proto:
 	protoc-c --c_out=$(CURRENT_FOLDER) fileformat.proto
 	protoc-c --c_out=$(CURRENT_FOLDER) osmformat.proto
 
-fileformat.pb-c.o:
+fileformat.pb-c.o: prepare_proto
 	gcc -c $(OFLAGS) fileformat.pb-c.c
 
-osmformat.pb-c.o:
+osmformat.pb-c.o: prepare_proto
 	gcc -c $(OFLAGS) osmformat.pb-c.c
 
 zdecode.o:
@@ -38,8 +38,8 @@ osm_reader.o:
 reader.o:
 	gcc -c $(OFLAGS) reader.c
 
-reader: zdecode.o type_defs.o json_encode.o reader.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
-	gcc -g -lprotobuf-c -lz -ljansson -o reader reader.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
+reader: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o osm_reader.o reader.o
+	gcc $(LDFLAGS) -o reader reader.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
 
 osm_fdw.o:
 	gcc -c $(OFLAGS) osm_fdw.c

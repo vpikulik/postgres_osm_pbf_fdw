@@ -3,61 +3,77 @@
 
 
 void free_tag(OsmTag* tag) {
-    // free(tag->key);
-    // free(tag->value);
+    free(tag->key);
+    free(tag->value);
     free(tag);
-};
+}
 
-OsmNode* init_node() {
-    OsmNode* node = (OsmNode*)malloc(sizeof(OsmNode));
-    node->tags_count = 0;
-    return node;
-};
 
-void free_node(OsmNode* node) {
+OsmItem* init_item() {
+    OsmItem* item = (OsmItem*)malloc(sizeof(OsmItem));
+    item->id = 0;
+    item->lat = 0;
+    item->lon = 0;
+    item->tags_count = 0;
+    return item;
+}
+
+
+void free_item(OsmItem* item) {
     int i;
-    for (i=0;i<node->tags_count;i++) {
-        free_tag(node->tags[i]);
+    for (i=0; i<item->tags_count; i++) {
+        free_tag(item->tags[i]);
     };
-    free(node);
-};
+    free(item);
+}
 
-void node_add_tag(OsmNode* node, OsmTag* tag) {
-    node->tags_count += 1;
-    if (node->tags_count == 1) {
-        node->tags = (OsmTag**)malloc(sizeof(OsmTag*));
+
+void item_add_tag(OsmItem* item, OsmTag* tag) {
+    item->tags_count += 1;
+    if (item->tags_count == 1) {
+        item->tags = (OsmTag**)malloc(sizeof(OsmTag*));
     } else {
-        node->tags = realloc(node->tags, sizeof(OsmTag*) * node->tags_count);
+        item->tags = realloc(item->tags, sizeof(OsmTag*) * item->tags_count);
     };
-    node->tags[node->tags_count - 1] = tag;
-};
+    item->tags[item->tags_count - 1] = tag;
+}
 
-Cursor* init_cursor() {
+
+Cursor* alloc_cursor() {
     Cursor* cursor = (Cursor*)malloc(sizeof(Cursor));
-    cursor->nodes_count = 0;
+    cursor->items_count = 0;
     return cursor;
-};
+}
 
-void free_cursor(Cursor* cursor){
-    int i;
-    for (i=0;i<cursor->nodes_count;i++) {
-        free_node(cursor->nodes[i]);
-    };
+
+void clear_cursor(Cursor* cursor) {
+    cursor->position = -1;
+
+    cursor->items_count = 0;
+    cursor->items = (OsmItem**)malloc(sizeof(OsmItem*) * DEFAULT_ITEMS_COUNT);
+}
+
+
+void free_cursor_items(Cursor* cursor) {
+    if (cursor->items_count > 0) {
+        int i;
+        for (i=0; i<cursor->items_count; i++) {
+            free_item(cursor->items[i]);
+        }
+    }
+    if (cursor->items) {
+        free(cursor->items);
+    }
+}
+
+
+void free_cursor(Cursor* cursor) {
+    free_cursor_items(cursor);
     free(cursor);
-};
+}
 
-void cursor_add_node(Cursor* cursor, OsmNode* node){
-    if (cursor->nodes_count % DEFAULT_NODES_COUNT == 0) {
-        if (cursor->nodes_count == 0){
-            cursor->nodes = (OsmNode**)malloc(sizeof(OsmNode*)*DEFAULT_NODES_COUNT);
-        } else {
-            int count = (cursor->nodes_count+1)/DEFAULT_NODES_COUNT;
-            cursor->nodes = realloc(
-                cursor->nodes,
-                sizeof(OsmNode*) * DEFAULT_NODES_COUNT * count
-            );
-        };
-    };
-    cursor->nodes_count += 1;
-    cursor->nodes[cursor->nodes_count-1] = node;
-};
+
+void cursor_add_item(Cursor* cursor, OsmItem* item){
+    cursor->items_count += 1;
+    cursor->items[cursor->items_count-1] = item;
+}
