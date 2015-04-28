@@ -34,7 +34,7 @@ int main (int argc, const char * argv[]) {
             fputs("\n", out);
         }
         index += 1;
-    } while (item != NULL && index < 5);
+    } while (item != NULL && index < 24000);
 
     free_cursor(cursor);
 

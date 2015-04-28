@@ -3,8 +3,8 @@
 
 
 void free_tag(OsmTag* tag) {
-    free(tag->key);
-    free(tag->value);
+    // free(tag->key);
+    // free(tag->value);
     free(tag);
 }
 

@@ -149,7 +149,6 @@ void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_
 
 void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
     OSMPBF__PrimitiveBlock* primitive_block = osmpbf__primitive_block__unpack(NULL, data->size, data->data);
-    printf("Count of primitive groups: %d\n", primitive_block->n_primitivegroup);
     char** strings = read_osm_string_table(primitive_block->stringtable);
     int i;
     for (i=0; i<primitive_block->n_primitivegroup; i++) {
