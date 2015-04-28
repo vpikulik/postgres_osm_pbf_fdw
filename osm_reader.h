@@ -15,7 +15,7 @@
 
 OSMPBF__BlobHeader* read_blob_header(FILE *file, int header_size);
 ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header);
-char** read_osm_string_table(OSMPBF__StringTable *stringtable);
+void read_osm_string_table(Cursor* cursor, OSMPBF__StringTable *stringtable);
 OSMPBF__HeaderBlock* read_osm_header_block(Cursor* cursor, ResizedBuffer* data);
 double get_lat(int64_t lat, OSMPBF__PrimitiveBlock* primitive_block);
 double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block);

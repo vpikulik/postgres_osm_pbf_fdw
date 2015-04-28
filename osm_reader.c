@@ -44,7 +44,8 @@ ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header) {
 };
 
 
-char** read_osm_string_table(OSMPBF__StringTable *stringtable) {
+void read_osm_string_table(Cursor* cursor, OSMPBF__StringTable *stringtable) {
+    cursor->strings_count = stringtable->n_s;
     char** strings = malloc(sizeof(char*) * stringtable->n_s);
     int i;
     for (i=0; i<stringtable->n_s; i++) {
@@ -53,7 +54,7 @@ char** read_osm_string_table(OSMPBF__StringTable *stringtable) {
         memcpy(str, item.data, item.len);
         strings[i] = str;
     }
-    return strings;
+    cursor->strings = strings;
 };
 
 
@@ -149,12 +150,11 @@ void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_
 
 void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
     OSMPBF__PrimitiveBlock* primitive_block = osmpbf__primitive_block__unpack(NULL, data->size, data->data);
-    char** strings = read_osm_string_table(primitive_block->stringtable);
+    read_osm_string_table(cursor, primitive_block->stringtable);
     int i;
     for (i=0; i<primitive_block->n_primitivegroup; i++) {
-        read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], strings, primitive_block);
+        read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], cursor->strings, primitive_block);
     }
-    free(strings);
     osmpbf__primitive_block__free_unpacked(primitive_block, NULL);
 };
 

@@ -33,7 +33,8 @@ void item_add_tag(OsmItem* item, OsmTag* tag) {
     if (item->tags_count == 1) {
         item->tags = (OsmTag**)malloc(sizeof(OsmTag*));
     } else {
-        item->tags = realloc(item->tags, sizeof(OsmTag*) * item->tags_count);
+        OsmTag** tags = realloc(item->tags, sizeof(OsmTag*) * item->tags_count);
+        item->tags = tags;
     };
     item->tags[item->tags_count - 1] = tag;
 }
@@ -50,6 +51,7 @@ void clear_cursor(Cursor* cursor) {
     cursor->position = -1;
 
     cursor->items_count = 0;
+    // TODO: not here
     cursor->items = (OsmItem**)malloc(sizeof(OsmItem*) * DEFAULT_ITEMS_COUNT);
 }
 
@@ -67,8 +69,20 @@ void free_cursor_items(Cursor* cursor) {
 }
 
 
+void free_cursor_strings(Cursor* cursor) {
+    if (cursor->strings_count > 0) {
+        int i;
+        for (i=0; i<cursor->strings_count; i++) {
+            free(cursor->strings[i]);
+        }
+    }
+    free(cursor->strings);
+}
+
+
 void free_cursor(Cursor* cursor) {
     free_cursor_items(cursor);
+    free_cursor_strings(cursor);
     free(cursor);
 }
 

@@ -26,6 +26,8 @@ typedef struct {
     int position;
     int items_count;
     OsmItem** items;
+    int strings_count;
+    char** strings;
 } Cursor;
 
 
@@ -38,6 +40,7 @@ Cursor* alloc_cursor();
 void clear_cursor(Cursor* cursor);
 void free_cursor(Cursor* cursor);
 void free_cursor_items(Cursor* cursor);
+void free_cursor_strings(Cursor* cursor);
 void cursor_add_item(Cursor* cursor, OsmItem* item);
 
 #endif
