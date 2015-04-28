@@ -24,6 +24,7 @@ void free_item(OsmItem* item) {
     for (i=0; i<item->tags_count; i++) {
         free_tag(item->tags[i]);
     };
+    if (item->tags_count > 0) free(item->tags);
     free(item);
 }
 
@@ -43,15 +44,15 @@ void item_add_tag(OsmItem* item, OsmTag* tag) {
 Cursor* alloc_cursor() {
     Cursor* cursor = (Cursor*)malloc(sizeof(Cursor));
     cursor->items_count = 0;
+    cursor->items = NULL;
     return cursor;
 }
 
 
 void clear_cursor(Cursor* cursor) {
-    cursor->position = -1;
-
+    free_cursor_items(cursor);
+    free_cursor_strings(cursor);
     cursor->items_count = 0;
-    // TODO: not here
     cursor->items = (OsmItem**)malloc(sizeof(OsmItem*) * DEFAULT_ITEMS_COUNT);
 }
 
@@ -63,9 +64,7 @@ void free_cursor_items(Cursor* cursor) {
             free_item(cursor->items[i]);
         }
     }
-    if (cursor->items) {
-        free(cursor->items);
-    }
+    free(cursor->items);
 }
 
 

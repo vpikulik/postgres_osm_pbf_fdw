@@ -172,7 +172,8 @@ void _load_data_from_file(Cursor* cursor, FILE* file, short read_header) {
     ResizedBuffer* blob_data = read_blob(file, header);
 
     if (read_header) {
-        read_osm_header_block(cursor, blob_data);
+        // just ignore this header block
+        // read_osm_header_block(cursor, blob_data);
     } else {
         read_osm_primitive_block(cursor, blob_data);
     }
@@ -190,6 +191,7 @@ void read_osm_header(Cursor* cursor, FILE* file) {
 OsmItem* read_osm_item(Cursor* cursor, FILE* file) {
     if (cursor->position == -1) {
         do {
+            clear_cursor(cursor);
             _load_data_from_file(cursor, file, 0);
         } while (cursor->items_count == 0 && !feof(file));
         cursor->position = 0;
@@ -203,7 +205,7 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file) {
         OsmItem* item = cursor->items[cursor->position];
         cursor->position ++;
         if (cursor->position >= cursor->items_count - 1) {
-            clear_cursor(cursor);
+            cursor->position = -1;
         }
         return item;
     }
