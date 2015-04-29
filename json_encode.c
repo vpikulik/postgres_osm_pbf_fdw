@@ -15,7 +15,7 @@ json_object* encode_tags(OsmItem* item) {
 char* encode_item(OsmItem* item) {
     json_object *jitem, *jtags;
     jitem = json_object_new_object();
-    json_object_object_add(jitem, "id", json_object_new_int(item->id));
+    json_object_object_add(jitem, "id", json_object_new_int64(item->id));
     json_object_object_add(jitem, "lat", json_object_new_double(item->lat));
     json_object_object_add(jitem, "lon", json_object_new_double(item->lon));
 
