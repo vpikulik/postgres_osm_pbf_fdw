@@ -12,11 +12,12 @@ void print_progress(FILE *file, int file_size) {
 
 
 int main (int argc, const char * argv[]) {
-    FILE *fl = fopen("/home/promo/Downloads/belarus-latest.osm.pbf", "r");
+    FILE *fl = fopen(argv[1], "r");
     FILE *out = fopen("/tmp/out.json", "w");
 
     fseek(fl, 0, SEEK_END);
     int file_size = ftell(fl);
+    printf("File size: %d\n", file_size);
     fseek(fl, 0, SEEK_SET);
 
     int index = 0;
@@ -28,7 +29,7 @@ int main (int argc, const char * argv[]) {
 
     OsmItem* item;
     do {
-        item = read_osm_item(cursor, fl);
+        item = read_osm_item(cursor, fl, file_size);
         if (item) {
             char* json_item_txt = encode_item(item);
             fputs(json_item_txt, out);

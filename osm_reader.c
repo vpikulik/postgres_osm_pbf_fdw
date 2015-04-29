@@ -188,8 +188,12 @@ void read_osm_header(Cursor* cursor, FILE* file) {
 }
 
 
-OsmItem* read_osm_item(Cursor* cursor, FILE* file) {
+OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
+
     if (cursor->position == -1) {
+        if (ftell(file) >= file_size) {
+            return NULL;
+        }
         do {
             clear_cursor(cursor);
             _load_data_from_file(cursor, file, 0);
