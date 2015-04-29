@@ -188,16 +188,25 @@ void read_osm_header(Cursor* cursor, FILE* file) {
 }
 
 
+short int check_eof(FILE* file, int file_size) {
+    if (ftell(file) >= file_size) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
 OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
 
     if (cursor->position == -1) {
-        if (ftell(file) >= file_size) {
+        if (check_eof(file,file_size)) {
             return NULL;
         }
         do {
             clear_cursor(cursor);
             _load_data_from_file(cursor, file, 0);
-        } while (cursor->items_count == 0 && !feof(file));
+        } while (cursor->items_count == 0 && !check_eof(file,file_size));
         cursor->position = 0;
     }
 
