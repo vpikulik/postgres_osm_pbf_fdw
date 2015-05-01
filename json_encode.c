@@ -26,8 +26,11 @@ char* encode_item(OsmItem* item) {
 
     json_object_object_add(jitem, "type", json_object_new_string(type_name));
     json_object_object_add(jitem, "id", json_object_new_int64(item->id));
-    json_object_object_add(jitem, "lat", json_object_new_double(item->lat));
-    json_object_object_add(jitem, "lon", json_object_new_double(item->lon));
+
+    if (item->lat > 0 || item->lon > 0) {
+        json_object_object_add(jitem, "lat", json_object_new_double(item->lat));
+        json_object_object_add(jitem, "lon", json_object_new_double(item->lon));
+    }
 
     if (item->tags_count > 0) {
         jtags = encode_tags(item);
