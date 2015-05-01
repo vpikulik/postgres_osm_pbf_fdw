@@ -159,6 +159,8 @@ void read_osm_way(Cursor* cursor, OSMPBF__Way *way, char** strings, OSMPBF__Prim
         tag->key = strings[key_index];
         tag->value = strings[val_index];
         item_add_tag(item, tag);
+
+        item_copy_node_refs(item, way->n_refs, way->refs);
     }
 };
 

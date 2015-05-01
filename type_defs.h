@@ -3,6 +3,7 @@
 #define TYPE_DEFS_INCLUDED
 
 #include <stdlib.h>
+#include <string.h>
 
 #define DEFAULT_ITEMS_COUNT 8000
 
@@ -26,8 +27,10 @@ typedef struct {
     int64_t id;
     double lat;
     double lon;
-    int32_t tags_count;
+    size_t tags_count;
     OsmTag** tags;
+    size_t node_refs_count;
+    int64_t *node_refs;
 } OsmItem;
 
 
@@ -51,5 +54,6 @@ void free_cursor(Cursor* cursor);
 void free_cursor_items(Cursor* cursor);
 void free_cursor_strings(Cursor* cursor);
 void cursor_add_item(Cursor* cursor, OsmItem* item);
+void item_copy_node_refs(OsmItem *item, size_t count, int64_t *node_refs);
 
 #endif

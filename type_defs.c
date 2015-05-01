@@ -16,16 +16,22 @@ OsmItem* init_item() {
     item->lat = 0;
     item->lon = 0;
     item->tags_count = 0;
+    item->node_refs_count = 0;
     return item;
 }
 
 
 void free_item(OsmItem* item) {
     int i;
-    for (i=0; i<item->tags_count; i++) {
-        free_tag(item->tags[i]);
-    };
-    if (item->tags_count > 0) free(item->tags);
+    if (item->tags_count > 0) {
+        for (i=0; i<item->tags_count; i++) {
+            free_tag(item->tags[i]);
+        }
+        free(item->tags);
+    }
+    if (item->node_refs_count > 0) {
+        free(item->node_refs);
+    }
     free(item);
 }
 
@@ -39,6 +45,19 @@ void item_add_tag(OsmItem* item, OsmTag* tag) {
         item->tags = tags;
     };
     item->tags[item->tags_count - 1] = tag;
+}
+
+
+void item_copy_node_refs(OsmItem *item, size_t count, int64_t *node_refs) {
+    int i;
+    int64_t ref;
+    item->node_refs_count = count;
+    item->node_refs = (int64_t*)malloc(sizeof(int64_t)*count);
+    ref = 0;
+    for (i=0; i<count; i++) {
+        ref += node_refs[i];
+        item->node_refs[i] = ref;
+    }
 }
 
 
