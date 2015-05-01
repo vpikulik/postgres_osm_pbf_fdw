@@ -142,10 +142,37 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
 };
 
 
+void read_osm_way(Cursor* cursor, OSMPBF__Way *way, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
+    int i;
+
+    OsmItem* item = init_item();
+    item->type = WAY;
+    item->id = way->id;
+    cursor_add_item(cursor, item);
+
+    int32_t key_index, val_index;
+    for (i=0;i<way->n_keys;i++) {
+        key_index = way->keys[i];
+        val_index= way->vals[i];
+
+        OsmTag* tag = (OsmTag*)malloc(sizeof(OsmTag));
+        tag->key = strings[key_index];
+        tag->value = strings[val_index];
+        item_add_tag(item, tag);
+    }
+};
+
+
 void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_group, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
     if (primitive_group->dense) {
         read_osm_dense_nodes(cursor, primitive_group->dense, strings, primitive_block);
-    };
+    }
+    if (primitive_group->n_ways > 0) {
+        int i;
+        for (i=0; i<primitive_group->n_ways; i++) {
+            read_osm_way(cursor, primitive_group->ways[i], strings, primitive_block);
+        }
+    }
 };
 
 
