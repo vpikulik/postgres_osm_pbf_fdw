@@ -114,6 +114,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         lon = lon + dense->lon[i];
 
         OsmItem* item = init_item();
+        item->type = NODE;
         item->id = id;
         item->lat = get_lat(lat, primitive_block);
         item->lon = get_lon(lon, primitive_block);

@@ -12,9 +12,18 @@ json_object* encode_tags(OsmItem* item) {
     return jtags;
 };
 
+
 char* encode_item(OsmItem* item) {
     json_object *jitem, *jtags;
+    char* type_name;
     jitem = json_object_new_object();
+
+
+    if (item->type == NODE) type_name = "NODE";
+    else if (item->type == WAY) type_name = "WAY";
+    else if (item->type == RELATION) type_name = "RELATION";
+
+    json_object_object_add(jitem, "type", json_object_new_string(type_name));
     json_object_object_add(jitem, "id", json_object_new_int64(item->id));
     json_object_object_add(jitem, "lat", json_object_new_double(item->lat));
     json_object_object_add(jitem, "lon", json_object_new_double(item->lon));
@@ -26,7 +35,6 @@ char* encode_item(OsmItem* item) {
     const char* j_output = json_object_to_json_string(jitem);
     char* output = (char*)malloc(sizeof(char)*(strlen(j_output)+1));
     strcpy(output, j_output);
-    json_object_put(jtags);
     json_object_put(jitem);
     return output;
 };

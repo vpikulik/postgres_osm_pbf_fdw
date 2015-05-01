@@ -11,6 +11,7 @@ void free_tag(OsmTag* tag) {
 
 OsmItem* init_item() {
     OsmItem* item = (OsmItem*)malloc(sizeof(OsmItem));
+    item->type = UNDEFINED;
     item->id = 0;
     item->lat = 0;
     item->lon = 0;

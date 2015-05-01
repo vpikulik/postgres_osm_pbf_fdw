@@ -13,7 +13,16 @@ typedef struct {
 } OsmTag;
 
 
+typedef enum {
+    UNDEFINED = 0,
+    NODE = 1,
+    WAY = 2,
+    RELATION = 3
+} OsmItemType;
+
+
 typedef struct {
+    OsmItemType type;
     int64_t id;
     double lat;
     double lon;
