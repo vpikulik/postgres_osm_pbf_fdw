@@ -24,7 +24,7 @@ typedef enum {
 
 typedef struct {
     char* role;
-    int64_t member_id;
+    int64_t id;
     OsmItemType type;
 } OsmMember;
 

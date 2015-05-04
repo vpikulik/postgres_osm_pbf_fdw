@@ -27,7 +27,7 @@ json_object* encode_members(OsmItem* item) {
         json_object *jmember = json_object_new_object();
         json_object_object_add(jmember, "role", json_object_new_string(member->role));
         json_object_object_add(jmember, "type", json_object_new_string(member_type_name));
-        json_object_object_add(jmember, "id", json_object_new_int64(member->member_id));
+        json_object_object_add(jmember, "id", json_object_new_int64(member->id));
         json_object_array_add(jmembers, jmember);
     };
     return jmembers;
