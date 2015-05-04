@@ -130,15 +130,14 @@ IterateForeignScan (ForeignScanState *node){
     slot->tts_values[3] = Float8GetDatum(p_lon);
     slot->tts_isnull[3] = false;
 
-    // if (item->tags_count > 0) {
-    //     json_object* jtags = encode_tags(item);
-    //     text *tags_json = cstring_to_text(encode_json(jtags));
-    //     slot->tts_values[4] = PointerGetDatum(tags_json);
-    //     slot->tts_isnull[4] = false;
-    // } else {
+    if (item->tags_count > 0) {
+        text *tags_json = cstring_to_text(encode_tags(item));
+        slot->tts_values[4] = PointerGetDatum(tags_json);
+        slot->tts_isnull[4] = false;
+    } else {
         slot->tts_values[4] = PointerGetDatum(NULL);
         slot->tts_isnull[4] = true;
-    // }
+    }
 
     return ExecStoreVirtualTuple(slot);
 };

@@ -2,7 +2,7 @@
 #include "json_encode.h"
 
 
-json_object* encode_tags(OsmItem* item) {
+json_object* prepare_tags(OsmItem* item) {
     json_object *jtags = json_object_new_object();
     int i;
     for (i=0; i<item->tags_count; i++) {
@@ -13,7 +13,7 @@ json_object* encode_tags(OsmItem* item) {
 };
 
 
-json_object* encode_members(OsmItem* item) {
+json_object* prepare_members(OsmItem* item) {
     json_object *jmembers = json_object_new_array();
     char* member_type_name;
     int i;
@@ -32,6 +32,18 @@ json_object* encode_members(OsmItem* item) {
     };
     return jmembers;
 };
+
+
+char* encode_tags(OsmItem* item) {
+    json_object *jtags;
+    jtags = prepare_tags(item);
+
+    const char* j_output = json_object_to_json_string(jtags);
+    char* output = (char*)malloc(sizeof(char)*(strlen(j_output)+1));
+    strcpy(output, j_output);
+    json_object_put(jtags);
+    return output;
+}
 
 
 char* encode_item(OsmItem* item) {
@@ -54,7 +66,7 @@ char* encode_item(OsmItem* item) {
     }
 
     if (item->tags_count > 0) {
-        jtags = encode_tags(item);
+        jtags = prepare_tags(item);
         json_object_object_add(jitem, "tags", jtags);
     }
 
@@ -68,7 +80,7 @@ char* encode_item(OsmItem* item) {
     }
 
     if (item->members_count > 0) {
-        jmembers = encode_members(item);
+        jmembers = prepare_members(item);
         json_object_object_add(jitem, "members", jmembers);
     }
 

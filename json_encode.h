@@ -5,5 +5,5 @@
 #include "type_defs.h"
 
 
-json_object* encode_tags(OsmItem* item);
+char* encode_tags(OsmItem* item);
 char* encode_item(OsmItem* item);
