@@ -8,6 +8,10 @@ void free_tag(OsmTag* tag) {
     free(tag);
 }
 
+void free_member(OsmMember* member) {
+    free(member);
+}
+
 
 OsmItem* init_item() {
     OsmItem* item = (OsmItem*)malloc(sizeof(OsmItem));
@@ -17,6 +21,7 @@ OsmItem* init_item() {
     item->lon = 0;
     item->tags_count = 0;
     item->node_refs_count = 0;
+    item->members_count = 0;
     return item;
 }
 
@@ -28,6 +33,12 @@ void free_item(OsmItem* item) {
             free_tag(item->tags[i]);
         }
         free(item->tags);
+    }
+    if (item->members_count > 0) {
+        for (i=0; i<item->members_count; i++) {
+            free_member(item->members[i]);
+        }
+        free(item->members);
     }
     if (item->node_refs_count > 0) {
         free(item->node_refs);
@@ -45,6 +56,17 @@ void item_add_tag(OsmItem* item, OsmTag* tag) {
         item->tags = tags;
     };
     item->tags[item->tags_count - 1] = tag;
+}
+
+
+void item_add_member(OsmItem *item, OsmMember *member) {
+    item->members_count += 1;
+    if (item->members_count == 1) {
+        item->members = (OsmMember**)malloc(sizeof(OsmMember*));
+    } else {
+        item->members = realloc(item->members, sizeof(OsmMember*) * item->members_count);
+    };
+    item->members[item->members_count - 1] = member;
 }
 
 

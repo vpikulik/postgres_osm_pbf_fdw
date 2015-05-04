@@ -23,14 +23,27 @@ typedef enum {
 
 
 typedef struct {
+    char* role;
+    int64_t member_id;
+    OsmItemType type;
+} OsmMember;
+
+
+typedef struct {
     OsmItemType type;
     int64_t id;
+
     double lat;
     double lon;
+
     size_t tags_count;
     OsmTag** tags;
+
     size_t node_refs_count;
     int64_t *node_refs;
+
+    size_t members_count;
+    OsmMember **members;
 } OsmItem;
 
 
@@ -46,6 +59,7 @@ typedef struct {
 OsmItem* init_item();
 void free_item(OsmItem* item);
 void item_add_tag(OsmItem* node, OsmTag* tag);
+void item_add_member(OsmItem *item, OsmMember *member);
 
 
 Cursor* alloc_cursor();

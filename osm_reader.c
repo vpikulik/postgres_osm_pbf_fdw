@@ -174,7 +174,7 @@ void read_osm_relation(Cursor* cursor, OSMPBF__Relation *relation, char** string
     cursor_add_item(cursor, item);
 
     int32_t key_index, val_index;
-    for (i=0;i<relation->n_keys;i++) {
+    for (i=0; i<relation->n_keys; i++) {
         key_index = relation->keys[i];
         val_index= relation->vals[i];
 
@@ -182,6 +182,22 @@ void read_osm_relation(Cursor* cursor, OSMPBF__Relation *relation, char** string
         tag->key = strings[key_index];
         tag->value = strings[val_index];
         item_add_tag(item, tag);
+    }
+
+    int64_t member_id = 0;
+    for (i=0; i<relation->n_memids; i++) {
+        member_id += relation->memids[i];
+        OsmMember *member = (OsmMember*)malloc(sizeof(OsmMember));
+        member->role = strings[relation->roles_sid[i]];
+        member->member_id = member_id;
+        if (relation->types[i] == OSMPBF__RELATION__MEMBER_TYPE__NODE) {
+            member->type = NODE;
+        } else if (relation->types[i] == OSMPBF__RELATION__MEMBER_TYPE__WAY) {
+            member->type = WAY;
+        } else if (relation->types[i] == OSMPBF__RELATION__MEMBER_TYPE__RELATION) {
+            member->type = RELATION;
+        }
+        item_add_member(item, member);
     }
 }
 
