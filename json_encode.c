@@ -3,18 +3,39 @@
 
 
 json_object* encode_tags(OsmItem* item) {
-    json_object * jtags = json_object_new_object();
+    json_object *jtags = json_object_new_object();
     int i;
     for (i=0; i<item->tags_count; i++) {
-        OsmTag* tag = item->tags[i];
+        OsmTag *tag = item->tags[i];
         json_object_object_add(jtags, tag->key, json_object_new_string(tag->value));
     };
     return jtags;
 };
 
 
+json_object* encode_members(OsmItem* item) {
+    json_object *jmembers = json_object_new_array();
+    char* member_type_name;
+    int i;
+    for (i=0; i<item->members_count; i++) {
+        OsmMember* member = item->members[i];
+
+        if (member->type == NODE) member_type_name = "NODE";
+        else if (member->type == WAY) member_type_name = "WAY";
+        else if (member->type == RELATION) member_type_name = "RELATION";
+
+        json_object *jmember = json_object_new_object();
+        json_object_object_add(jmember, "role", json_object_new_string(member->role));
+        json_object_object_add(jmember, "type", json_object_new_string(member_type_name));
+        json_object_object_add(jmember, "id", json_object_new_int64(member->member_id));
+        json_object_array_add(jmembers, jmember);
+    };
+    return jmembers;
+};
+
+
 char* encode_item(OsmItem* item) {
-    json_object *jitem, *jtags;
+    json_object *jitem, *jtags, *jmembers;
     char* type_name;
     int i;
 
@@ -44,6 +65,11 @@ char* encode_item(OsmItem* item) {
             json_object_array_add(jrefs, jref_str);
         }
         json_object_object_add(jitem, "refs", jrefs);
+    }
+
+    if (item->members_count > 0) {
+        jmembers = encode_members(item);
+        json_object_object_add(jitem, "members", jmembers);
     }
 
     const char* j_output = json_object_to_json_string(jitem);

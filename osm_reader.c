@@ -190,6 +190,7 @@ void read_osm_relation(Cursor* cursor, OSMPBF__Relation *relation, char** string
         OsmMember *member = (OsmMember*)malloc(sizeof(OsmMember));
         member->role = strings[relation->roles_sid[i]];
         member->member_id = member_id;
+        member->type = UNDEFINED;
         if (relation->types[i] == OSMPBF__RELATION__MEMBER_TYPE__NODE) {
             member->type = NODE;
         } else if (relation->types[i] == OSMPBF__RELATION__MEMBER_TYPE__WAY) {
