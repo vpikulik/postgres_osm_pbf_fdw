@@ -87,6 +87,8 @@ Cursor* alloc_cursor() {
     Cursor* cursor = (Cursor*)malloc(sizeof(Cursor));
     cursor->items_count = 0;
     cursor->items = NULL;
+    cursor->strings_count = 0;
+    cursor->strings = NULL;
     return cursor;
 }
 

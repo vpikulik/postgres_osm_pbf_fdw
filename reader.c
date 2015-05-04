@@ -21,7 +21,6 @@ int main (int argc, const char * argv[]) {
     fseek(fl, 0, SEEK_SET);
 
     int index = 0;
-    int current_pos;
     Cursor* cursor = alloc_cursor();
     clear_cursor(cursor);
     cursor->position = -1;

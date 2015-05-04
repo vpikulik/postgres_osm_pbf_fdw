@@ -22,9 +22,8 @@ PG_MODULE_MAGIC;
 typedef struct FdwExecutionState
 {
     FILE* file;
-    int cursor_index;
-    int cursor_position;
     Cursor* cursor;
+    int file_size;
 } FdwExecutionState;
 
 
@@ -83,40 +82,39 @@ GetForeignPlan (PlannerInfo *root,
 };
 
 void
-BeginForeignScan (ForeignScanState *node,
-                  int eflags) {
-
+BeginForeignScan (ForeignScanState *node, int eflags) {
     FdwExecutionState *state = (FdwExecutionState*) palloc(sizeof(FdwExecutionState));
 
-    state->file = fopen("/home/promo/Downloads/belarus-latest.osm.pbf", "r");
-    state->cursor_index = 0;
-    state->cursor_position = 0;
+    FILE *file = fopen("/home/promo/Downloads/monaco-latest.osm.pbf", "r");
+    fseek(file, 0, SEEK_END);
+    state->file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    state->file = file;
 
-    node->fdw_state = (void *) state;
+    state->cursor = alloc_cursor();
+    clear_cursor(state->cursor);
+    state->cursor->position = -1;
+    read_osm_header(state->cursor, state->file);
+
+    node->fdw_state = (void*)state;
 };
 
 TupleTableSlot *
 IterateForeignScan (ForeignScanState *node){
-
+    OsmItem* item;
     FdwExecutionState *state = node->fdw_state;
 
-    if (feof(state->file) || state->cursor_index > 3) {
+    item = read_osm_item(state->cursor, state->file, state->file_size);
+    if (item == NULL) {
         return NULL;
     }
 
     TupleTableSlot *slot = node->ss.ss_ScanTupleSlot;
     ExecClearTuple(slot);
 
-    if (state->cursor_position == 0) {
-        state->cursor = init_cursor();
-        fill_cursor(state->cursor, state->file, state->cursor_index == 0);
-    }
-
-    OsmNode* osm_node = state->cursor->nodes[state->cursor_position];
-
     // columns: id, type, lat, lon, tags
 
-    int64 p_id = (int64)osm_node->id;
+    int64 p_id = (int64)item->id;
     slot->tts_values[0] = Int64GetDatum(p_id);
     slot->tts_isnull[0] = false;
 
@@ -124,31 +122,23 @@ IterateForeignScan (ForeignScanState *node){
     slot->tts_values[1] = PointerGetDatum(type_name);
     slot->tts_isnull[1] = false;
 
-    float8 p_lat = (float8)osm_node->lat;
+    float8 p_lat = (float8)item->lat;
     slot->tts_values[2] = Float8GetDatum(p_lat);
     slot->tts_isnull[2] = false;
 
-    float8 p_lon = (float8)osm_node->lon;
+    float8 p_lon = (float8)item->lon;
     slot->tts_values[3] = Float8GetDatum(p_lon);
     slot->tts_isnull[3] = false;
 
-    if (osm_node->tags_count > 0) {
-        json_object* jtags = encode_tags(osm_node);
-        text *tags_json = cstring_to_text(encode_json(jtags));
-        slot->tts_values[4] = PointerGetDatum(tags_json);
-        slot->tts_isnull[4] = false;
-    } else {
+    // if (item->tags_count > 0) {
+    //     json_object* jtags = encode_tags(item);
+    //     text *tags_json = cstring_to_text(encode_json(jtags));
+    //     slot->tts_values[4] = PointerGetDatum(tags_json);
+    //     slot->tts_isnull[4] = false;
+    // } else {
         slot->tts_values[4] = PointerGetDatum(NULL);
         slot->tts_isnull[4] = true;
-    }
-
-
-    state->cursor_position += 1;
-    if (state->cursor_position >= state->cursor->nodes_count) {
-        state->cursor_position = 0;
-        state->cursor_index += 1;
-        free_cursor(state->cursor);
-    }
+    // }
 
     return ExecStoreVirtualTuple(slot);
 };
@@ -157,15 +147,15 @@ void
 ReScanForeignScan (ForeignScanState *node) {
 
     FdwExecutionState *state = node->fdw_state;
-    state->cursor_position = 0;
-    state->cursor_index = 0;
     fseek(state->file, 0, SEEK_SET);
-    if (state->cursor) free_cursor(state->cursor);
+    clear_cursor(state->cursor);
+    state->cursor->position = -1;
 };
 
 void
 EndForeignScan (ForeignScanState *node) {
     FdwExecutionState *state = node->fdw_state;
+    free_cursor(state->cursor);
     fclose(state->file);
 };
 

@@ -8,7 +8,7 @@ OFLAGS = -g -fpic $(CFLAGS)
 EXTENSIONS_FOLDER = `pg_config --sharedir`/extension
 LIB_FOLDER = `pg_config --pkglibdir`
 
-all: clean osm_fdw.so
+all: clean osm_fdw.so reader
 
 clean:
 	rm -rf *.pb-c.* *.o *.so reader zpipe out.res
@@ -44,8 +44,8 @@ reader: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o o
 osm_fdw.o:
 	gcc -c $(OFLAGS) osm_fdw.c
 
-osm_fdw.so: osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
-	gcc -shared -fpic -dynamic $(LDFLAGS) -o osm_fdw.so osm_fdw.o zdecode.o type_defs.o json_encode.o osm_reader.o fileformat.pb-c.o osmformat.pb-c.o
+osm_fdw.so: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o osm_reader.o osm_fdw.o
+	gcc -shared -fpic -dynamic $(LDFLAGS) -o osm_fdw.so osm_fdw.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
 
 zpipe:
 	gcc -g -lz -o zpipe zpipe.c
