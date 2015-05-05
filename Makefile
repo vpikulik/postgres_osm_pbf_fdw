@@ -1,54 +1,31 @@
 
 CURRENT_FOLDER = $(shell pwd)
 
-CFLAGS = `pkg-config --cflags json-c` -I`pg_config --includedir-server` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags zlib`
-LDFLAGS = `pkg-config --libs json-c` `pkg-config --libs libprotobuf-c` `pkg-config --libs zlib`
+CFLAGS = $(pkg-config --cflags json-c) -I$(pkg_config --includedir-server) $(pkg-config --cflags libprotobuf-c) $(pkg-config --cflags zlib)
+LDFLAGS = $(pkg-config --libs json-c) $(pkg-config --libs libprotobuf-c) $(pkg-config --libs zlib)
 OFLAGS = -g -fpic $(CFLAGS)
 
-EXTENSIONS_FOLDER = `pg_config --sharedir`/extension
-LIB_FOLDER = `pg_config --pkglibdir`
+EXTENSIONS_FOLDER = $(pg_config --sharedir)/extension
+LIB_FOLDER = $(pg_config --pkglibdir)
 
-all: clean osm_fdw.so reader
+all: clean osm_fdw.so osm_to_json
 
 clean:
-	rm -rf *.pb-c.* *.o *.so reader zpipe out.res
+	rm -rf osm_to_json osm_fdw.so osm_fdw--1.0.sql osm_fdw.control
+	make -C ./osm_reader clean
+	make -C ./osm_convert clean
 
-prepare_proto:
-	protoc-c --c_out=$(CURRENT_FOLDER) fileformat.proto
-	protoc-c --c_out=$(CURRENT_FOLDER) osmformat.proto
+osm_to_json:
+	make -C ./osm_reader objects
+	make -C ./osm_convert osm_to_json
+	mv ./osm_convert/osm_to_json ./osm_to_json
 
-fileformat.pb-c.o: prepare_proto
-	gcc -c $(OFLAGS) fileformat.pb-c.c
-
-osmformat.pb-c.o: prepare_proto
-	gcc -c $(OFLAGS) osmformat.pb-c.c
-
-zdecode.o:
-	gcc -c $(OFLAGS) zdecode.c
-
-type_defs.o:
-	gcc -c $(OFLAGS) type_defs.c
-
-json_encode.o:
-	gcc -c $(OFLAGS) json_encode.c
-
-osm_reader.o:
-	gcc -c $(OFLAGS) osm_reader.c
-
-reader.o:
-	gcc -c $(OFLAGS) reader.c
-
-reader: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o osm_reader.o reader.o
-	gcc $(LDFLAGS) -o reader reader.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
-
-osm_fdw.o:
-	gcc -c $(OFLAGS) osm_fdw.c
-
-osm_fdw.so: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o osm_reader.o osm_fdw.o
-	gcc -shared -fpic -dynamic $(LDFLAGS) -o osm_fdw.so osm_fdw.o osm_reader.o type_defs.o json_encode.o zdecode.o fileformat.pb-c.o osmformat.pb-c.o
-
-zpipe:
-	gcc -g -lz -o zpipe zpipe.c
+osm_fdw.so:
+	make -C ./osm_reader objects
+	make -C ./osm_fdw osm_fdw.so
+	mv ./osm_fdw/osm_fdw.so ./osm_fdw.so
+	ln -s ./osm_fdw/osm_fdw--1.0.sql
+	ln -s ./osm_fdw/osm_fdw.control
 
 install: osm_fdw.so
 	rm -rf $(EXTENSIONS_FOLDER)/osm_fdw--1.0.sql $(EXTENSIONS_FOLDER)/osm_fdw.control $(LIB_FOLDER)/osm_fdw.so

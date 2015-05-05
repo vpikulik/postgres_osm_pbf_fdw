@@ -1,4 +1,6 @@
 *.o
-reader
 *.pb-c.*
 *.so
+osm_to_json
+osm_fdw--1.0.sql
+osm_fdw.control
