@@ -29,9 +29,9 @@ json_object* prepare_members(OsmItem* item) {
         json_object_object_add(jmember, "type", json_object_new_string(member_type_name));
         json_object_object_add(jmember, "id", json_object_new_int64(member->id));
         json_object_array_add(jmembers, jmember);
-    };
+    }
     return jmembers;
-};
+}
 
 
 char* encode_tags(OsmItem* item) {
@@ -42,6 +42,18 @@ char* encode_tags(OsmItem* item) {
     char* output = (char*)malloc(sizeof(char)*(strlen(j_output)+1));
     strcpy(output, j_output);
     json_object_put(jtags);
+    return output;
+}
+
+
+char* encode_members(OsmItem* item) {
+    json_object *jmembers;
+    jmembers = prepare_members(item);
+
+    const char* j_output = json_object_to_json_string(jmembers);
+    char* output = (char*)malloc(sizeof(char)*(strlen(j_output)+1));
+    strcpy(output, j_output);
+    json_object_put(jmembers);
     return output;
 }
 

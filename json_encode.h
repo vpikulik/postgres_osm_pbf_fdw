@@ -6,4 +6,5 @@
 
 
 char* encode_tags(OsmItem* item);
+char* encode_members(OsmItem* item);
 char* encode_item(OsmItem* item);

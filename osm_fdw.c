@@ -165,6 +165,15 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[5] = true;
     }
 
+    if (item->members_count > 0) {
+        text *members_json = cstring_to_text(encode_members(item));
+        slot->tts_values[6] = PointerGetDatum(members_json);
+        slot->tts_isnull[6] = false;
+    } else {
+        slot->tts_values[6] = PointerGetDatum(NULL);
+        slot->tts_isnull[6] = true;
+    }
+
     return ExecStoreVirtualTuple(slot);
 };
 
