@@ -118,17 +118,30 @@ IterateForeignScan (ForeignScanState *node){
     slot->tts_values[0] = Int64GetDatum(p_id);
     slot->tts_isnull[0] = false;
 
-    text *type_name = cstring_to_text("Node");
+    text *type_name;
+    if (item->type == NODE) type_name = cstring_to_text("NODE");
+    else if (item->type == WAY) type_name = cstring_to_text("WAY");
+    else if (item->type == RELATION) type_name = cstring_to_text("RELATION");
     slot->tts_values[1] = PointerGetDatum(type_name);
     slot->tts_isnull[1] = false;
 
     float8 p_lat = (float8)item->lat;
-    slot->tts_values[2] = Float8GetDatum(p_lat);
-    slot->tts_isnull[2] = false;
+    if (p_lat) {
+        slot->tts_values[2] = Float8GetDatum(p_lat);
+        slot->tts_isnull[2] = false;
+    } else {
+        slot->tts_values[2] = PointerGetDatum(NULL);
+        slot->tts_isnull[2] = true;
+    }
 
     float8 p_lon = (float8)item->lon;
-    slot->tts_values[3] = Float8GetDatum(p_lon);
-    slot->tts_isnull[3] = false;
+    if (p_lon) {
+        slot->tts_values[3] = Float8GetDatum(p_lon);
+        slot->tts_isnull[3] = false;
+    } else {
+        slot->tts_values[3] = PointerGetDatum(NULL);
+        slot->tts_isnull[3] = true;
+    }
 
     if (item->tags_count > 0) {
         text *tags_json = cstring_to_text(encode_tags(item));
