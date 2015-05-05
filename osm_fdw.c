@@ -152,6 +152,19 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[4] = true;
     }
 
+    if (item->node_refs_count > 0) {
+        Datum *node_refs_array = (Datum*)palloc(sizeof(Datum) * item->node_refs_count);
+        int i;
+        for (i=0; i<item->node_refs_count; i++) {
+            node_refs_array[i] = Int64GetDatum(item->node_refs[i]);
+        }
+        slot->tts_values[5] = PointerGetDatum(construct_array(node_refs_array, item->node_refs_count, INT8OID, sizeof(int64), true, 'i'));
+        slot->tts_isnull[5] = false;
+    } else {
+        slot->tts_values[5] = PointerGetDatum(NULL);
+        slot->tts_isnull[5] = true;
+    }
+
     return ExecStoreVirtualTuple(slot);
 };
 
