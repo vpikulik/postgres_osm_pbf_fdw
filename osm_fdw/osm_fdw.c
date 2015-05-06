@@ -2,6 +2,7 @@
 #include "postgres.h"
 #include "catalog/pg_type.h"
 #include "foreign/fdwapi.h"
+#include "foreign/foreign.h"
 #include "optimizer/cost.h"
 #include "optimizer/pathnode.h" // create_foreignscan_path
 #include "optimizer/planmain.h" // make_foreignscan
@@ -9,6 +10,7 @@
 #include "utils/array.h"
 #include "utils/json.h"
 #include "utils/builtins.h"
+#include "utils/rel.h" // RelationGetRelid
 
 PG_MODULE_MAGIC;
 
@@ -25,6 +27,34 @@ typedef struct FdwExecutionState
     Cursor* cursor;
     int file_size;
 } FdwExecutionState;
+
+
+char* get_file_name(Oid foreigntableid) {
+    ForeignTable *table = GetForeignTable(foreigntableid);
+    List *options;
+    ListCell *lc, *prev;
+    options = NIL;
+    options = list_concat(options, table->options);
+    char *filename = NULL;
+    prev = NULL;
+    foreach(lc, options) {
+        DefElem    *def = (DefElem *) lfirst(lc);
+
+        if (strcmp(def->defname, "filename") == 0)
+        {
+            *filename = defGetString(def);
+            options = list_delete_cell(options, lc, prev);
+            break;
+        }
+        prev = lc;
+    }
+
+    if (filename == NULL) {
+        elog(ERROR, "filename is required for file_fdw foreign tables");
+    }
+
+    return filename;
+}
 
 
 void
@@ -85,7 +115,9 @@ void
 BeginForeignScan (ForeignScanState *node, int eflags) {
     FdwExecutionState *state = (FdwExecutionState*) palloc(sizeof(FdwExecutionState));
 
-    FILE *file = fopen("/home/promo/Downloads/monaco-latest.osm.pbf", "r");
+    char* filename = get_file_name(RelationGetRelid(node->ss.ss_currentRelation));
+    FILE *file = fopen(filename, "r");
+    free(filename);
     fseek(file, 0, SEEK_END);
     state->file_size = ftell(file);
     fseek(file, 0, SEEK_SET);

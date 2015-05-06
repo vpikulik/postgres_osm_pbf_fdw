@@ -1,12 +1,7 @@
 
 CURRENT_FOLDER = $(shell pwd)
-
-CFLAGS = $(pkg-config --cflags json-c) -I$(pkg_config --includedir-server) $(pkg-config --cflags libprotobuf-c) $(pkg-config --cflags zlib)
-LDFLAGS = $(pkg-config --libs json-c) $(pkg-config --libs libprotobuf-c) $(pkg-config --libs zlib)
-OFLAGS = -g -fpic $(CFLAGS)
-
-EXTENSIONS_FOLDER = $(pg_config --sharedir)/extension
-LIB_FOLDER = $(pg_config --pkglibdir)
+EXTENSIONS_FOLDER = $(shell pg_config --sharedir)/extension
+LIB_FOLDER = $(shell pg_config --pkglibdir)
 
 all: clean osm_fdw.so osm_to_json
 
@@ -14,6 +9,7 @@ clean:
 	rm -rf osm_to_json osm_fdw.so osm_fdw--1.0.sql osm_fdw.control
 	make -C ./osm_reader clean
 	make -C ./osm_convert clean
+	make -C ./osm_fdw clean
 
 osm_to_json:
 	make -C ./osm_reader objects
