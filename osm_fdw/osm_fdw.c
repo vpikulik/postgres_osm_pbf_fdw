@@ -1,6 +1,7 @@
 
 #include "postgres.h"
 #include "catalog/pg_type.h"
+#include "commands/defrem.h" // defGetString
 #include "foreign/fdwapi.h"
 #include "foreign/foreign.h"
 #include "optimizer/cost.h"
@@ -42,7 +43,7 @@ char* get_file_name(Oid foreigntableid) {
 
         if (strcmp(def->defname, "filename") == 0)
         {
-            *filename = defGetString(def);
+            filename = defGetString(def);
             options = list_delete_cell(options, lc, prev);
             break;
         }
@@ -117,7 +118,7 @@ BeginForeignScan (ForeignScanState *node, int eflags) {
 
     char* filename = get_file_name(RelationGetRelid(node->ss.ss_currentRelation));
     FILE *file = fopen(filename, "r");
-    free(filename);
+    // free(filename);
     fseek(file, 0, SEEK_END);
     state->file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
