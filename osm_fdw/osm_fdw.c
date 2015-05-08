@@ -39,12 +39,13 @@ char* get_file_name(Oid foreigntableid) {
     char *filename = NULL;
     prev = NULL;
     foreach(lc, options) {
-        DefElem    *def = (DefElem *) lfirst(lc);
+        DefElem *def = (DefElem *) lfirst(lc);
 
         if (strcmp(def->defname, "filename") == 0)
         {
             filename = defGetString(def);
             options = list_delete_cell(options, lc, prev);
+            pfree(def);
             break;
         }
         prev = lc;
@@ -177,9 +178,11 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->tags_count > 0) {
-        text *tags_json = cstring_to_text(encode_tags(item));
-        slot->tts_values[4] = PointerGetDatum(tags_json);
+        char *tags_json = encode_tags(item);
+        text *tags_text = cstring_to_text(tags_json);
+        slot->tts_values[4] = PointerGetDatum(tags_text);
         slot->tts_isnull[4] = false;
+        free(tags_json);
     } else {
         slot->tts_values[4] = PointerGetDatum(NULL);
         slot->tts_isnull[4] = true;
@@ -191,17 +194,21 @@ IterateForeignScan (ForeignScanState *node){
         for (i=0; i<item->node_refs_count; i++) {
             node_refs_array[i] = Int64GetDatum(item->node_refs[i]);
         }
-        slot->tts_values[5] = PointerGetDatum(construct_array(node_refs_array, item->node_refs_count, INT8OID, sizeof(int64), true, 'i'));
+        ArrayType *node_refs_array_values = construct_array(node_refs_array, item->node_refs_count, INT8OID, sizeof(int64), true, 'i');
+        slot->tts_values[5] = PointerGetDatum(node_refs_array_values);
         slot->tts_isnull[5] = false;
+        pfree(node_refs_array);
     } else {
         slot->tts_values[5] = PointerGetDatum(NULL);
         slot->tts_isnull[5] = true;
     }
 
     if (item->members_count > 0) {
-        text *members_json = cstring_to_text(encode_members(item));
-        slot->tts_values[6] = PointerGetDatum(members_json);
+        char *members_json = encode_members(item);
+        text *members_text = cstring_to_text(members_json);
+        slot->tts_values[6] = PointerGetDatum(members_text);
         slot->tts_isnull[6] = false;
+        free(members_json);
     } else {
         slot->tts_values[6] = PointerGetDatum(NULL);
         slot->tts_isnull[6] = true;
