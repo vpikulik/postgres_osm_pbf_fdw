@@ -1,3 +1,6 @@
+
+#define _OSM_DEBUG
+
 #include <stdio.h>
 
 #include "type_defs.h"

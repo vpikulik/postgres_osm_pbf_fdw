@@ -18,13 +18,8 @@ ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header) {
     OSMPBF__Blob* blob = osmpbf__blob__unpack(NULL, header->datasize, buf);
     free(buf);
 
-    if (blob->has_raw_size) {
-        // printf("Raw size: %d\n", blob->raw_size);
-    }
-
     if (blob->has_raw) {
         ProtobufCBinaryData *rdata = &blob->raw;
-        // printf("Raw size: %d\n", rdata->len);
         ResizedBuffer *data = init_resized_buffer();
         append_data(data, rdata->len, rdata->data);
         osmpbf__blob__free_unpacked(blob, NULL);
@@ -32,14 +27,14 @@ ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header) {
 
     } else if (blob->has_zlib_data) {
         ProtobufCBinaryData *zdata = &blob->zlib_data;
-        // printf("Z size: %d\n", zdata->len);
         ResizedBuffer *data = zdecode(zdata->data, zdata->len);
-        // printf("Out size: %d\n", data->size);
         osmpbf__blob__free_unpacked(blob, NULL);
         return data;
 
     } else if (blob->has_lzma_data) {
+        #ifdef _OSM_DEBUG
         printf("Do not support lzma\n");
+        #endif
     }
 };
 
@@ -60,7 +55,9 @@ void read_osm_string_table(Cursor* cursor, OSMPBF__StringTable *stringtable) {
 
 OSMPBF__HeaderBlock* read_osm_header_block(Cursor* cursor, ResizedBuffer* data){
     OSMPBF__HeaderBlock *header_block = osmpbf__header_block__unpack(NULL, data->size, data->data);
+    #ifdef _OSM_DEBUG
     printf("Count of required features: %d\n", header_block->n_required_features);
+    #endif
     return header_block;
 };
 
@@ -100,7 +97,9 @@ double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block){
 
 
 void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
+    #ifdef _OSM_DEBUG
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
+    #endif
     if (dense->n_id == 0) return;
 
     OsmItem** items = malloc(sizeof(OsmItem*) * dense->n_id);
