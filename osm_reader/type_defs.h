@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ALLOCATED_TAGS 10
+#define ALLOCATED_MEMBERS 10
 #define DEFAULT_ITEMS_COUNT 8000
 
 
