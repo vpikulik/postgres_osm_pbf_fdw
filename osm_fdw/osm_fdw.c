@@ -1,4 +1,8 @@
 
+#if VERSION == v93
+#define _USE_LIBJSONC
+#endif
+
 #include "postgres.h"
 #include "catalog/pg_type.h"
 #include "commands/defrem.h" // defGetString
@@ -17,7 +21,9 @@ PG_MODULE_MAGIC;
 
 
 #include "osm_reader.h"
+#ifdef _USE_LIBJSONC
 #include "json_encode.h"
+#endif
 
 #define ROWS_COUNT 8000*1000
 
@@ -115,6 +121,7 @@ GetForeignPlan (PlannerInfo *root,
 
 void
 BeginForeignScan (ForeignScanState *node, int eflags) {
+    char* version = PG_VERSION;
     FdwExecutionState *state = (FdwExecutionState*) palloc(sizeof(FdwExecutionState));
 
     char* filename = get_file_name(RelationGetRelid(node->ss.ss_currentRelation));
@@ -178,11 +185,16 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->tags_count > 0) {
+        #ifdef _USE_LIBJSONC
         char *tags_json = encode_tags(item);
         text *tags_text = cstring_to_text(tags_json);
         slot->tts_values[4] = PointerGetDatum(tags_text);
         slot->tts_isnull[4] = false;
         free(tags_json);
+        #else
+        slot->tts_values[4] = PointerGetDatum(NULL);
+        slot->tts_isnull[4] = true;
+        #endif
     } else {
         slot->tts_values[4] = PointerGetDatum(NULL);
         slot->tts_isnull[4] = true;
@@ -204,11 +216,16 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->members_count > 0) {
+        #ifdef _USE_LIBJSONC
         char *members_json = encode_members(item);
         text *members_text = cstring_to_text(members_json);
         slot->tts_values[6] = PointerGetDatum(members_text);
         slot->tts_isnull[6] = false;
         free(members_json);
+        #else
+        slot->tts_values[6] = PointerGetDatum(NULL);
+        slot->tts_isnull[6] = true;
+        #endif
     } else {
         slot->tts_values[6] = PointerGetDatum(NULL);
         slot->tts_isnull[6] = true;
