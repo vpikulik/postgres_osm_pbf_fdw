@@ -6,16 +6,18 @@ FC = -g -fpic
 F_JSON = $(shell pkg-config --cflags json-c)
 F_PG = -I$(shell pg_config --includedir-server)
 LDFLAGS = $(shell pkg-config --libs json-c) $(shell pkg-config --libs libprotobuf-c) $(shell pkg-config --libs zlib)
-ENV_VARS = -DVERSION=$(VERSION)
+ENV_VARS =
 
 objects = osm_fdw.o $(READER_FOLDER)/osm_reader.o
 objects += $(READER_FOLDER)/type_defs.o
-ifeq ($(VERSION), 9.3)
-objects += $(READER_FOLDER)/json_encode.o
-endif
 objects += $(READER_FOLDER)/zdecode.o
 objects += $(READER_FOLDER)/fileformat.pb-c.o
 objects += $(READER_FOLDER)/osmformat.pb-c.o
+
+ifeq ($(VERSION), 9.3)
+ENV_VARS += -DUSE_LIBJSONC
+objects += $(READER_FOLDER)/json_encode.o
+endif
 
 
 clean:

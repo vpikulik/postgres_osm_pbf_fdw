@@ -5,16 +5,16 @@ CURRENT_FOLDER = $(shell pwd)
 EXTENSIONS_FOLDER = $(shell pg_config --sharedir)/extension
 LIB_FOLDER = $(shell pg_config --pkglibdir)
 
-all: clean set_93 compile
+all: clean set_v93 compile
 
-all94: clean set_94 compile
+all94: clean set_v94 compile
 
 compile: osm_fdw.so osm_to_json
 
-set_94:
+set_v94:
 	$(eval VERSION = 9.4)
 
-set_93:
+set_v93:
 	$(eval VERSION = 9.3)
 
 clean:

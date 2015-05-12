@@ -1,8 +1,4 @@
 
-#if VERSION == v93
-#define _USE_LIBJSONC
-#endif
-
 #include "postgres.h"
 #include "catalog/pg_type.h"
 #include "commands/defrem.h" // defGetString
@@ -21,7 +17,7 @@ PG_MODULE_MAGIC;
 
 
 #include "osm_reader.h"
-#ifdef _USE_LIBJSONC
+#ifdef USE_LIBJSONC
 #include "json_encode.h"
 #endif
 
@@ -185,7 +181,7 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->tags_count > 0) {
-        #ifdef _USE_LIBJSONC
+        #ifdef USE_LIBJSONC
         char *tags_json = encode_tags(item);
         text *tags_text = cstring_to_text(tags_json);
         slot->tts_values[4] = PointerGetDatum(tags_text);
@@ -216,7 +212,7 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->members_count > 0) {
-        #ifdef _USE_LIBJSONC
+        #ifdef USE_LIBJSONC
         char *members_json = encode_members(item);
         text *members_text = cstring_to_text(members_json);
         slot->tts_values[6] = PointerGetDatum(members_text);
