@@ -12,7 +12,7 @@
 
 #include "osm_reader.h"
 
-JsonbValue* jsonb_encode_tags(OsmItem* item);
-JsonbValue* jsonb_encode_members(OsmItem* item);
+Datum jsonb_encode_tags(OsmItem* item);
+Datum jsonb_encode_members(OsmItem* item);
 
 #endif

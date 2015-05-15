@@ -180,6 +180,8 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[3] = true;
     }
 
+    slot->tts_values[4] = PointerGetDatum(NULL);
+    slot->tts_isnull[4] = true;
     if (item->tags_count > 0) {
         #ifdef USE_LIBJSONC
         char *tags_json = encode_tags(item);
@@ -187,13 +189,13 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_values[4] = PointerGetDatum(tags_text);
         slot->tts_isnull[4] = false;
         free(tags_json);
-        #else
-        slot->tts_values[4] = PointerGetDatum(NULL);
-        slot->tts_isnull[4] = true;
         #endif
-    } else {
-        slot->tts_values[4] = PointerGetDatum(NULL);
-        slot->tts_isnull[4] = true;
+
+        #ifdef USE_JSONB
+        Datum jdt = jsonb_encode_tags(item);
+        slot->tts_values[4] = jdt;
+        slot->tts_isnull[4] = false;
+        #endif
     }
 
     if (item->node_refs_count > 0) {
@@ -211,6 +213,8 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[5] = true;
     }
 
+    slot->tts_values[6] = PointerGetDatum(NULL);
+    slot->tts_isnull[6] = true;
     if (item->members_count > 0) {
         #ifdef USE_LIBJSONC
         char *members_json = encode_members(item);
@@ -218,13 +222,12 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_values[6] = PointerGetDatum(members_text);
         slot->tts_isnull[6] = false;
         free(members_json);
-        #else
-        slot->tts_values[6] = PointerGetDatum(NULL);
-        slot->tts_isnull[6] = true;
         #endif
-    } else {
-        slot->tts_values[6] = PointerGetDatum(NULL);
-        slot->tts_isnull[6] = true;
+
+        #ifdef USE_JSONB
+        slot->tts_values[6] = jsonb_encode_members(item);
+        slot->tts_isnull[6] = false;
+        #endif
     }
 
     return ExecStoreVirtualTuple(slot);

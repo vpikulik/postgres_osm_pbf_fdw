@@ -55,7 +55,7 @@ JsonbValue* make_jsonb_object(int elems_count, JsonbValue **keys, JsonbValue **v
     return jobject;
 }
 
-JsonbValue* jsonb_encode_tags(OsmItem* item) {
+Datum jsonb_encode_tags(OsmItem* item) {
     int i;
     JsonbValue **jkeys = (JsonbValue**)palloc(sizeof(JsonbValue*) * item->tags_count);
     JsonbValue **jvalues = (JsonbValue**)palloc(sizeof(JsonbValue*) * item->tags_count);
@@ -65,12 +65,13 @@ JsonbValue* jsonb_encode_tags(OsmItem* item) {
         jvalues[i] = make_jsonb_string_value(tag->value);
     }
     // free data here
-    return make_jsonb_object(item->tags_count, jkeys, jvalues);
+    JsonbValue *jtags = make_jsonb_object(item->tags_count, jkeys, jvalues);
+    Jsonb *jbtags = JsonbValueToJsonb(jtags);
+    return JsonbGetDatum(jbtags);
 }
 
 
 static JsonbValue* jsonb_encode_member(OsmMember* member) {
-    int i;
     JsonbValue **jkeys = (JsonbValue**)palloc(sizeof(JsonbValue*) * 3);
     JsonbValue **jvalues = (JsonbValue**)palloc(sizeof(JsonbValue*) * 3);
 
@@ -90,7 +91,7 @@ static JsonbValue* jsonb_encode_member(OsmMember* member) {
 }
 
 
-JsonbValue* jsonb_encode_members(OsmItem* item) {
+Datum jsonb_encode_members(OsmItem* item) {
     int i;
     JsonbValue **jvalues = (JsonbValue**)palloc(sizeof(JsonbValue*) * item->members_count);
     for (i=0; i<item->members_count; i++) {
@@ -98,5 +99,7 @@ JsonbValue* jsonb_encode_members(OsmItem* item) {
         jvalues[i] = jsonb_encode_member(member);
     }
     // free data here
-    return make_jsonb_array(item->members_count, jvalues);
+    JsonbValue *jmembers = make_jsonb_array(item->members_count, jvalues);
+    Jsonb *jbmembers = JsonbValueToJsonb(jmembers);
+    return JsonbGetDatum(jbmembers);
 }
