@@ -9,7 +9,6 @@
 #include "optimizer/planmain.h" // make_foreignscan
 #include "optimizer/restrictinfo.h" // extract_actual_clauses
 #include "utils/array.h"
-#include "utils/json.h"
 #include "utils/builtins.h"
 #include "utils/rel.h" // RelationGetRelid
 
@@ -18,7 +17,12 @@ PG_MODULE_MAGIC;
 
 #include "osm_reader.h"
 #ifdef USE_LIBJSONC
+#include "utils/json.h"
 #include "json_encode.h"
+#endif
+#ifdef USE_JSONB
+#include "utils/jsonb.h"
+#include "jsonb_encode.h"
 #endif
 
 #define ROWS_COUNT 8000*1000
@@ -180,8 +184,6 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[3] = true;
     }
 
-    slot->tts_values[4] = PointerGetDatum(NULL);
-    slot->tts_isnull[4] = true;
     if (item->tags_count > 0) {
         #ifdef USE_LIBJSONC
         char *tags_json = encode_tags(item);
@@ -192,10 +194,13 @@ IterateForeignScan (ForeignScanState *node){
         #endif
 
         #ifdef USE_JSONB
-        Datum jdt = jsonb_encode_tags(item);
-        slot->tts_values[4] = jdt;
+        Jsonb *jtags = jsonb_encode_tags(item);
+        slot->tts_values[4] = PointerGetDatum(jtags);
         slot->tts_isnull[4] = false;
         #endif
+    } else {
+        slot->tts_values[4] = PointerGetDatum(NULL);
+        slot->tts_isnull[4] = true;
     }
 
     if (item->node_refs_count > 0) {
@@ -213,8 +218,6 @@ IterateForeignScan (ForeignScanState *node){
         slot->tts_isnull[5] = true;
     }
 
-    slot->tts_values[6] = PointerGetDatum(NULL);
-    slot->tts_isnull[6] = true;
     if (item->members_count > 0) {
         #ifdef USE_LIBJSONC
         char *members_json = encode_members(item);
@@ -225,9 +228,13 @@ IterateForeignScan (ForeignScanState *node){
         #endif
 
         #ifdef USE_JSONB
-        slot->tts_values[6] = jsonb_encode_members(item);
+        Jsonb *jmembers = jsonb_encode_members(item);
+        slot->tts_values[6] = PointerGetDatum(jmembers);
         slot->tts_isnull[6] = false;
         #endif
+    } else {
+        slot->tts_values[6] = PointerGetDatum(NULL);
+        slot->tts_isnull[6] = true;
     }
 
     return ExecStoreVirtualTuple(slot);
