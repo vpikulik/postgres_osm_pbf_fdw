@@ -8,5 +8,11 @@ RETURNS fdw_handler
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT;
 
+CREATE FUNCTION osm_fdw_validator(text[], oid)
+RETURNS void
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT;
+
 CREATE FOREIGN DATA WRAPPER osm_fdw
-  HANDLER osm_fdw_handler;
+  HANDLER osm_fdw_handler
+  VALIDATOR osm_fdw_validator;

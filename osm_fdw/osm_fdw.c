@@ -11,6 +11,8 @@
 #include "utils/array.h"
 #include "utils/builtins.h"
 #include "utils/rel.h" // RelationGetRelid
+#include "access/reloptions.h" // untransformRelOptions
+#include "catalog/pg_foreign_table.h" // ForeignTableRelationId
 
 PG_MODULE_MAGIC;
 
@@ -270,4 +272,58 @@ osm_fdw_handler(PG_FUNCTION_ARGS)
     fdwroutine->EndForeignScan = EndForeignScan;
 
     PG_RETURN_POINTER(fdwroutine);
+}
+
+static short int file_exists(char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file != NULL) {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
+PG_FUNCTION_INFO_V1(osm_fdw_validator);
+
+Datum
+osm_fdw_validator(PG_FUNCTION_ARGS)
+{
+    Oid catalog = PG_GETARG_OID(1);
+    if (catalog != ForeignTableRelationId) {
+        PG_RETURN_VOID();
+    }
+
+    List *options_list = untransformRelOptions(PG_GETARG_DATUM(0));
+    char *filename = NULL;
+    ListCell *cell;
+
+    foreach(cell, options_list)
+    {
+        DefElem *def = (DefElem *) lfirst(cell);
+
+        if (strcmp(def->defname, "filename") == 0)
+        {
+            if (filename) {
+                ereport(ERROR,
+                        (errcode(ERRCODE_SYNTAX_ERROR),
+                         errmsg("conflicting or redundant options")));
+            }
+            filename = defGetString(def);
+        }
+    }
+
+    if (filename == NULL) {
+        ereport(ERROR,
+                (errcode(ERRCODE_FDW_DYNAMIC_PARAMETER_VALUE_NEEDED),
+                 errmsg("filename is required for file_fdw foreign tables")));
+    }
+
+    if (!file_exists(filename)) {
+        ereport(ERROR,
+                (errcode(ERRCODE_FDW_ERROR),
+                 errmsg("file can not be opened")));
+    }
+
+    PG_RETURN_VOID();
 }
