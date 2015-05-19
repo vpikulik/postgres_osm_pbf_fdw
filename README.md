@@ -24,9 +24,13 @@ Install debian packages:
 sudo apt-get install postgresql-server-dev-9.3 libjson-c-dev libjson-c2 libprotobuf-c-dev libprotobuf-c-compiler libprotobuf-c1 zlib1g-dev zlib1g
 ```
 
-To compile run:
+To compile for postgresql v9.3 run:
 ```bash
 make
+```
+if you use postgresql v9.4 run:
+```bash
+make all94
 ```
 
 Install
@@ -39,7 +43,7 @@ sudo make install
 Examples
 --------
 
-You can find example of full text address search for Berlin in examples/berlin_search.sql
+You can find example of full text address search for Berlin in examples/berlin_search.sql (or berlin_search_v94.sql)
 
 1. Please download the latest pbf file of Berlin from http://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf
 1. Change path to the downloaded file in foreign table options.
