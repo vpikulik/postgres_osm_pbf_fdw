@@ -64,8 +64,9 @@ Jsonb* jsonb_encode_tags(OsmItem* item) {
         jkeys[i] = make_jsonb_string_value(tag->key);
         jvalues[i] = make_jsonb_string_value(tag->value);
     }
-    // free data here
     JsonbValue *jtags = make_jsonb_object(item->tags_count, jkeys, jvalues);
+    pfree(jkeys);
+    pfree(jvalues);
     return JsonbValueToJsonb(jtags);
 }
 
@@ -85,8 +86,11 @@ static JsonbValue* jsonb_encode_member(OsmMember* member) {
     jvalues[1] = make_jsonb_string_value(member_type_name);
     jkeys[2] = make_jsonb_string_value("id");
     jvalues[2] = make_jsonb_numeric_value(member->id);
-    // free data here
-    return make_jsonb_object(3, jkeys, jvalues);
+
+    JsonbValue *jmember = make_jsonb_object(3, jkeys, jvalues);
+    pfree(jkeys);
+    pfree(jvalues);
+    return jmember;
 }
 
 
@@ -97,7 +101,7 @@ Jsonb* jsonb_encode_members(OsmItem* item) {
         OsmMember* member = item->members[i];
         jvalues[i] = jsonb_encode_member(member);
     }
-    // free data here
     JsonbValue *jmembers = make_jsonb_array(item->members_count, jvalues);
+    pfree(jvalues);
     return JsonbValueToJsonb(jmembers);
 }
