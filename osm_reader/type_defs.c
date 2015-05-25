@@ -22,6 +22,13 @@ OsmItem* init_item() {
     item->tags_count = 0;
     item->node_refs_count = 0;
     item->members_count = 0;
+
+    item->version = -1;
+    item->timestamp = 0;
+    item->changeset = -1;
+    item->uid = 0;
+    item->user = "";
+    item->visible = 1;
     return item;
 }
 

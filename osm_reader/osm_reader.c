@@ -96,13 +96,48 @@ double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block){
 };
 
 
+int64_t get_timestamp(int64_t timestamp, OSMPBF__PrimitiveBlock* primitive_block) {
+    int32_t granularity;
+    if (primitive_block->has_date_granularity) {
+        granularity = primitive_block->date_granularity;
+    } else {
+        granularity = 1000;
+    };
+    return granularity * timestamp;
+};
+
+
+void read_osm_dense_info(OsmItem **items, OSMPBF__DenseInfo *info, char** strings, OSMPBF__PrimitiveBlock *primitive_block) {
+    int i;
+    int64_t timestamp = 0;
+    int64_t changeset = 0;
+    int64_t uid = 0;
+    for (i=0; i<info->n_version; i++) {
+        OsmItem *item = items[i];
+
+        timestamp += info->timestamp[i];
+        changeset += info->changeset[i];
+        uid += info->uid[i];
+
+        item->version = info->version[i];
+        item->timestamp = get_timestamp(timestamp, primitive_block);
+        item->changeset = changeset;
+        item->uid = uid;
+        item->user = strings[info->user_sid[i]];
+        // if (info->visible[i]) {
+        //     item->visible = 1;
+        // }
+    }
+}
+
+
 void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
     #ifdef _OSM_DEBUG
     printf("Dense ids: %d, %d, %d, %d\n", dense->n_id, dense->n_lat, dense->n_lon, dense->n_keys_vals);
     #endif
     if (dense->n_id == 0) return;
 
-    OsmItem** items = malloc(sizeof(OsmItem*) * dense->n_id);
+    OsmItem **items = malloc(sizeof(OsmItem*) * dense->n_id);
     int i;
     int64_t id = 0;
     int64_t lat = 0;
@@ -112,7 +147,7 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
         lat = lat + dense->lat[i];
         lon = lon + dense->lon[i];
 
-        OsmItem* item = init_item();
+        OsmItem *item = init_item();
         item->type = NODE;
         item->id = id;
         item->lat = get_lat(lat, primitive_block);
@@ -137,8 +172,33 @@ void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** stri
             item_add_tag(items[item_index], tag);
         }
     } while (i < dense->n_keys_vals);
+
+    read_osm_dense_info(items, dense->denseinfo, strings, primitive_block);
+
     free(items);
 };
+
+
+void read_osm_info(OSMPBF__Info *info, char** strings, OsmItem* item, OSMPBF__PrimitiveBlock* primitive_block) {
+    if (info->has_version) {
+        item->version = info->version;
+    }
+    if (info->has_timestamp) {
+        item->timestamp = get_timestamp(info->timestamp, primitive_block);
+    }
+    if (info->has_changeset) {
+        item->changeset = info->changeset;
+    }
+    if (info->has_uid) {
+        item->uid = info->uid;
+    }
+    if (info->has_user_sid) {
+        item->user = strings[info->user_sid];
+    }
+    if (info->has_visible && !info->visible) {
+        item->visible = 0;
+    }
+}
 
 
 void read_osm_way(Cursor* cursor, OSMPBF__Way *way, char** strings, OSMPBF__PrimitiveBlock* primitive_block) {
@@ -162,6 +222,7 @@ void read_osm_way(Cursor* cursor, OSMPBF__Way *way, char** strings, OSMPBF__Prim
     if (way->n_refs > 0) {
         item_copy_node_refs(item, way->n_refs, way->refs);
     }
+    read_osm_info(way->info, strings, item, primitive_block);
 };
 
 
@@ -199,6 +260,8 @@ void read_osm_relation(Cursor* cursor, OSMPBF__Relation *relation, char** string
         }
         item_add_member(item, member);
     }
+
+    read_osm_info(relation->info, strings, item, primitive_block);
 }
 
 

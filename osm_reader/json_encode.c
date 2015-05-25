@@ -96,6 +96,17 @@ char* encode_item(OsmItem* item) {
         json_object_object_add(jitem, "members", jmembers);
     }
 
+    json_object_object_add(jitem, "version", json_object_new_int(item->version));
+    json_object_object_add(jitem, "timestamp", json_object_new_int64(item->timestamp));
+    json_object_object_add(jitem, "changeset", json_object_new_int64(item->changeset));
+    json_object_object_add(jitem, "uid", json_object_new_int(item->uid));
+    // char* user = (char*)malloc(sizeof(char)*(strlen(item->user)+1));
+    // memcpy(user, item->user, strlen(item->user));
+    if (item->user) {
+        json_object_object_add(jitem, "user", json_object_new_string(item->user));
+    }
+    json_object_object_add(jitem, "visible", json_object_new_int(item->visible));
+
     const char* j_output = json_object_to_json_string(jitem);
     char* output = (char*)malloc(sizeof(char)*(strlen(j_output)+1));
     strcpy(output, j_output);

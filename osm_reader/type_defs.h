@@ -46,6 +46,13 @@ typedef struct {
 
     size_t members_count;
     OsmMember **members;
+
+    int32_t version;
+    int64_t timestamp;
+    int64_t changeset;
+    int32_t uid;
+    char *user;
+    short int visible;
 } OsmItem;
 
 
