@@ -111,22 +111,24 @@ void read_osm_dense_info(OsmItem **items, OSMPBF__DenseInfo *info, char** string
     int i;
     int64_t timestamp = 0;
     int64_t changeset = 0;
-    int64_t uid = 0;
+    int32_t uid = 0;
+    int32_t user_sid = 0;
     for (i=0; i<info->n_version; i++) {
         OsmItem *item = items[i];
 
         timestamp += info->timestamp[i];
         changeset += info->changeset[i];
         uid += info->uid[i];
+        user_sid +=info->user_sid[i];
 
         item->version = info->version[i];
         item->timestamp = get_timestamp(timestamp, primitive_block);
         item->changeset = changeset;
         item->uid = uid;
-        item->user = strings[info->user_sid[i]];
-        // if (info->visible[i]) {
-        //     item->visible = 1;
-        // }
+        item->user = strings[user_sid];
+        if (info->n_visible > 0 && info->visible[i]) {
+            item->visible = 1;
+        }
     }
 }
 

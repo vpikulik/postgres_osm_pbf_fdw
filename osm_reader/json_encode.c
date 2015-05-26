@@ -102,7 +102,7 @@ char* encode_item(OsmItem* item) {
     json_object_object_add(jitem, "uid", json_object_new_int(item->uid));
     // char* user = (char*)malloc(sizeof(char)*(strlen(item->user)+1));
     // memcpy(user, item->user, strlen(item->user));
-    if (item->user) {
+    if (item->user != "") {
         json_object_object_add(jitem, "user", json_object_new_string(item->user));
     }
     json_object_object_add(jitem, "visible", json_object_new_int(item->visible));
