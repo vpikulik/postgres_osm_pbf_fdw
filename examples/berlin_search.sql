@@ -9,7 +9,13 @@ CREATE FOREIGN TABLE osm_berlin (
     lon double precision,
     tags json,
     refs bigint[],
-    members json
+    members json,
+
+    version int,
+    changeset bigint,
+    user_id int,
+    username text,
+    visible boolean
 )
 SERVER osm_fdw_server
 OPTIONS (
