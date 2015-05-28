@@ -1,0 +1,123 @@
+<!--
+slidedeck: A modification of the Google IO 2012 HTML5 slide template
+URL: https://github.com/rmcgibbo/slidedeck
+
+Based on https://github.com/francescolaffi/elastic-google-io-slides, and
+ultimately:
+
+Google IO 2012 HTML5 Slide Template
+Authors: Eric Bidelman <ebidel@gmail.com>
+         Luke Mahe <lukem@google.com>
+URL: https://code.google.com/p/io-2012-slides
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{- settings.title -}}</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+  <!--This one seems to work all the time, but really small on ipad-->
+  <!--<meta name="viewport" content="initial-scale=0.4">-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  {% if settings.favicon  %} <link rel="shortcut icon" href="{{- settings.favicon -}}"/> {% endif %}
+  <link rel="stylesheet" media="all" href="theme/css/default.css">
+  <link rel="stylesheet" media="all" href="theme/css/custom.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+  <script data-main="js/slides", src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.14/require.min.js"></script>
+
+
+  <!-- MathJax support  -->
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    showProcessingMessages: false,
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    TeX: {
+      extensions: ["color.js"]
+    },
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+  </script>
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div style="display:hidden">
+  \[
+    \definecolor{data}{RGB}{18,110,213}
+    \definecolor{unknown}{RGB}{217,86,16}
+    \definecolor{learned}{RGB}{175,114,176}
+  \]
+  </div>
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+<slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+
+    <h1>{{- settings.title -}}</h1>
+    <h2>{{- settings.subtitle -}}</h2>
+    <p>{{- settings.author -}}</p>
+  </hgroup>
+</slide>
+
+{% for slide in slides %}
+<slide {% if slide.class %}class="{{- slide.class -}}"{% endif %} {% if slide.image %}style="background-image: url({{- slide.image -}})"{% endif %}>
+  {% if 'segue' in slide.class %}
+    <!-- <aside class="gdbar"><img src="images/google_developers_icon_128.png"></aside> -->
+    <hgroup class="auto-fadein">
+      <h2>{{- slide.title -}}</h2>
+      <h3>{{- slide.subtitle -}}</h3>
+    </hgroup>
+  {% else %}
+    <hgroup>
+      <h2>{{- slide.title -}}</h2>
+      <h3>{{- slide.subtitle -}}</h3>
+    </hgroup>
+    <article {% if slide.content_class %}class="{{- slide.content_class -}}"{% endif %}>
+    {{- slide.content -}}
+    </article>
+ {% endif %}
+</slide>
+{% endfor %}
+
+<slide class="thank-you-slide segue nobackground">
+  <!-- <aside class="gdbar right"><img src="images/google_developers_icon_128.png"></aside> -->
+  <article class="flexbox vleft auto-fadein">
+    <h2>{{- settings.thankyou -}}</h2>
+    <p>{{- settings.thankyou_details -}}</p>
+  </article>
+  <p data-config-contact class="auto-fadein">{{- settings.contact -}}</p>
+  </p>
+</slide>
+
+<slide class="backdrop"></slide>
+
+</slides>
+
+<script>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-XXXXXXXX-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+</html>
