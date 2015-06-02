@@ -3,19 +3,9 @@
 % author: Vitaly Pikulik
 % author:
 % thankyou: Thanks everyone!
-% thankyou_details: And especially these people:
 % contact:
 % contact:
 % favicon: http://www.stanford.edu/favicon.ico
-
----
-title: Openstreetmap
-
-Types:
-
-- Node (coordinates, tags)
-- Way (refs, tags)
-- Relation (members, tags)
 
 ---
 title: Openstreetmap file formats
@@ -41,7 +31,16 @@ title: Postgres foreign data wrapper
 
 PostgreSQL allows to access data that resides outside database with regular SQL queries.
 
-Foreign data an be accessed with the help from a *foreign data wrapper*.
+Foreign data can be accessed with the help from a *foreign data wrapper*.
+
+---
+title: Openstreetmap
+
+Types:
+
+- Node (coordinates, tags)
+- Way (refs, tags)
+- Relation (members, tags)
 
 ---
 title: Create foreign table
