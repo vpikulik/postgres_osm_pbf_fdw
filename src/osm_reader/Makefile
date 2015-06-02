@@ -14,8 +14,12 @@ objects: fileformat.pb-c.o osmformat.pb-c.o zdecode.o type_defs.o json_encode.o 
 clean:
 	rm -rf *.pb-c.* *.o
 
-prepare_proto:
+prepare_proto: fileformat.pb-c.c osmformat.pb-c.c
+
+fileformat.pb-c.c:
 	protoc-c --c_out=$(CURRENT_FOLDER) fileformat.proto
+
+osmformat.pb-c.c:
 	protoc-c --c_out=$(CURRENT_FOLDER) osmformat.proto
 
 fileformat.pb-c.o: prepare_proto
