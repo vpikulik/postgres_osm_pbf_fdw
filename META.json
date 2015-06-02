@@ -1,0 +1,25 @@
+{
+    "name": "osm_fdw",
+    "abstract": "A short description",
+    "description": "A long description",
+    "version": "0.0.1",
+    "maintainer": "The maintainer's name",
+    "license": "postgresql",
+    "provides": {
+        "osm_fdw": {
+            "abstract": "A short description",
+            "file": "sql/osm_fdw.sql",
+            "docfile": "doc/osm_fdw.md",
+            "version": "0.0.1"
+        }
+    },
+    "release_status": "unstable",
+
+    "generated_by": "The maintainer's name",
+
+
+    "meta-spec": {
+        "version": "1.0.0",
+        "url": "http://pgxn.org/meta/spec.txt"
+    }
+}

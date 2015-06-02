@@ -1,42 +1,28 @@
+EXTENSION    = osm_fdw
+EXTVERSION   = $(shell grep default_version $(EXTENSION).control | sed -e "s/default_version[[:space:]]*=[[:space:]]*'\([^']*\)'/\1/")
 
-VERSION = 9.3
+DATA         = $(filter-out $(wildcard sql/*--*.sql),$(wildcard sql/*.sql))
+DOCS         = $(wildcard doc/*.md)
+TESTS        = $(wildcard test/sql/*.sql)
+REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+REGRESS_OPTS = --inputdir=test --load-language=plpgsql
+#
+# Uncoment the MODULES line if you are adding C files
+# to your extention.
+#
+#MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
+PG_CONFIG    = pg_config
+PG91         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0" && echo no || echo yes)
 
-CURRENT_FOLDER = $(shell pwd)
-EXTENSIONS_FOLDER = $(shell pg_config --sharedir)/extension
-LIB_FOLDER = $(shell pg_config --pkglibdir)
+ifeq ($(PG91),yes)
+all: sql/$(EXTENSION)--$(EXTVERSION).sql
 
-all: clean set_v93 compile
+sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
+	cp $< $@
 
-all94: clean set_v94 compile
+DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
+EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
+endif
 
-compile: osm_fdw.so osm_to_json
-
-set_v94:
-	$(eval VERSION = 9.4)
-
-set_v93:
-	$(eval VERSION = 9.3)
-
-clean:
-	rm -rf osm_to_json osm_fdw.so osm_fdw--1.0.sql osm_fdw.control
-	make -C ./osm_reader clean
-	make -C ./osm_convert clean
-	make -C ./osm_fdw clean
-
-osm_to_json:
-	make -C ./osm_reader objects
-	make -C ./osm_convert osm_to_json
-	mv ./osm_convert/osm_to_json ./osm_to_json
-
-osm_fdw.so:
-	make -C ./osm_reader objects VERSION=$(VERSION)
-	make -C ./osm_fdw osm_fdw.so VERSION=$(VERSION)
-	mv ./osm_fdw/osm_fdw.so ./osm_fdw.so
-	ln -s ./osm_fdw/osm_fdw--1.0.sql
-	ln -s ./osm_fdw/osm_fdw.control
-
-install: osm_fdw.so
-	rm -rf $(EXTENSIONS_FOLDER)/osm_fdw--1.0.sql $(EXTENSIONS_FOLDER)/osm_fdw.control $(LIB_FOLDER)/osm_fdw.so
-	ln -s $(CURRENT_FOLDER)/osm_fdw--1.0.sql $(EXTENSIONS_FOLDER)/osm_fdw--1.0.sql
-	ln -s $(CURRENT_FOLDER)/osm_fdw.control $(EXTENSIONS_FOLDER)/osm_fdw.control
-	ln -s $(CURRENT_FOLDER)/osm_fdw.so $(LIB_FOLDER)/osm_fdw.so
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)
