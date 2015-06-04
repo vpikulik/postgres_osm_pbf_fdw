@@ -1,25 +1,25 @@
 {
     "name": "osm_fdw",
-    "abstract": "A short description",
-    "description": "A long description",
-    "version": "0.0.1",
-    "maintainer": "The maintainer's name",
+    "abstract": "Openstreetmap PBF foreign data wrapper",
+    "description": "Foreign data wrapper that allows to read PBF openstreetmap format.",
+    "version": "0.1.0",
+    "maintainer": "Vitali Pikulik",
     "license": "postgresql",
     "provides": {
         "osm_fdw": {
-            "abstract": "A short description",
+            "abstract": "Openstreetmap PBF foreign data wrapper",
             "file": "sql/osm_fdw.sql",
             "docfile": "doc/osm_fdw.md",
-            "version": "0.0.1"
+            "version": "0.1.0"
         }
     },
     "release_status": "unstable",
 
-    "generated_by": "The maintainer's name",
+    "generated_by": "Vitali Pikulik",
 
 
     "meta-spec": {
-        "version": "1.0.0",
+        "version": "0.1.0",
         "url": "http://pgxn.org/meta/spec.txt"
     }
 }

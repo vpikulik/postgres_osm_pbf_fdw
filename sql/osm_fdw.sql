@@ -1,31 +1,16 @@
-/*
- * Author: The maintainer's name
- * Created at: 2015-06-02 09:43:22 +0200
- *
- */
 
---
--- This is a example code genereted automaticaly
--- by pgxn-utils.
+\echo Use "CREATE EXTENSION osm_fdw" to load this file. \quit
 
-SET client_min_messages = warning;
+CREATE FUNCTION osm_fdw_handler()
+RETURNS fdw_handler
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT;
 
--- If your extension will create a type you can
--- do somenthing like this
-CREATE TYPE osm_fdw AS ( a text, b text );
+CREATE FUNCTION osm_fdw_validator(text[], oid)
+RETURNS void
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT;
 
--- Maybe you want to create some function, so you can use
--- this as an example
-CREATE OR REPLACE FUNCTION osm_fdw (text, text)
-RETURNS osm_fdw LANGUAGE SQL AS 'SELECT ROW($1, $2)::osm_fdw';
-
--- Sometimes it is common to use special operators to
--- work with your new created type, you can create
--- one like the command bellow if it is applicable
--- to your case
-
-CREATE OPERATOR #? (
-	LEFTARG   = text,
-	RIGHTARG  = text,
-	PROCEDURE = osm_fdw
-);
+CREATE FOREIGN DATA WRAPPER osm_fdw
+  HANDLER osm_fdw_handler
+  VALIDATOR osm_fdw_validator;

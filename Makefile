@@ -18,14 +18,9 @@ PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.
 PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
 
 #ifeq ($(PG94),yes)
-#all: sql/$(EXTENSION)--$(EXTVERSION).sql
 
-# sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
-# 	cp $< $@
-
-# DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
-# EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
-EXTRA_CLEAN = 
+DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
+EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 
 #endif
 
@@ -39,23 +34,30 @@ F_Z = $(shell pkg-config --cflags zlib)
 F_JSON = $(shell pkg-config --cflags json-c)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
+SHLIB_LINK = $(shell pkg-config --libs json-c)
+SHLIB_LINK += $(shell pkg-config --libs libprotobuf-c)
+SHLIB_LINK += $(shell pkg-config --libs zlib)
+
 OBJS = osm_reader.o
 OBJS += type_defs.o
 OBJS += zdecode.o
 OBJS += fileformat.pb-c.o
 OBJS += osmformat.pb-c.o
-OBJS += osm_fdw.o
-
-ifeq ($(PG93), yes)
-ENV_VARS += -DUSE_LIBJSONC
-objects += json_encode.o
-else
+ifeq ($(PG94), yes)
 ENV_VARS += -DUSE_JSONB
-objects += jsonb_encode.o
+OBJS += jsonb_encode.o
+else
+ENV_VARS += -DUSE_LIBJSONC
+OBJS += json_encode.o
 endif
+OBJS += osm_fdw.o
 
 EXTRA_CLEAN += json_encode.o jsonb_encode.o
 
+build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
+
+sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
+	cp $< $@
 
 $(READER_FOLDER)/fileformat.pb-c.c:
 	make -C $(READER_FOLDER) fileformat.pb-c.c
@@ -79,7 +81,7 @@ json_encode.o:
 	gcc -c $(FC) $(F_JSON) $(READER_FOLDER)/json_encode.c
 
 jsonb_encode.o:
-	gcc -c $(FC) $(F_PG) $(ENV_VARS) -I$(READER_FOLDER) jsonb_encode.c
+	gcc -c $(FC) $(F_PG) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/jsonb_encode.c
 
 osm_reader.o:
 	gcc -c $(FC) $(READER_FOLDER)/osm_reader.c
