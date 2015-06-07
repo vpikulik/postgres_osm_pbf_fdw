@@ -1,42 +1,109 @@
+EXTENSION    = osm_fdw
+EXTVERSION   = $(shell grep default_version $(EXTENSION).control | sed -e "s/default_version[[:space:]]*=[[:space:]]*'\([^']*\)'/\1/")
 
-VERSION = 9.3
+DATA         = $(filter-out $(wildcard sql/*--*.sql),$(wildcard sql/*.sql))
+DOCS         = $(wildcard doc/*.md)
+TESTS        = $(wildcard test/sql/*.sql)
+REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+REGRESS_OPTS = --inputdir=test --load-language=plpgsql
+MODULE_big      = $(EXTENSION)
+
+#
+# Uncoment the MODULES line if you are adding C files
+# to your extention.
+#
+#MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
+PG_CONFIG    = pg_config
+PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
+PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
+
+#ifeq ($(PG94),yes)
+
+DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
+EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
+
+#endif
 
 CURRENT_FOLDER = $(shell pwd)
-EXTENSIONS_FOLDER = $(shell pg_config --sharedir)/extension
-LIB_FOLDER = $(shell pg_config --pkglibdir)
+READER_FOLDER = $(CURRENT_FOLDER)/src/osm_reader
+FDW_FOLDER = $(CURRENT_FOLDER)/src/osm_fdw
+CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 
-all: clean set_v93 compile
+FC = -g -fpic
+F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
+F_Z = $(shell pkg-config --cflags zlib)
+F_JSON = $(shell pkg-config --cflags json-c)
+F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-all94: clean set_v94 compile
+F_LD = $(shell pkg-config --libs json-c)
+F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD += $(shell pkg-config --libs zlib)
+SHLIB_LINK = $(F_LD)
 
-compile: osm_fdw.so osm_to_json
+OBJS = osm_reader.o
+OBJS += type_defs.o
+OBJS += zdecode.o
+OBJS += fileformat.pb-c.o
+OBJS += osmformat.pb-c.o
+ifeq ($(PG94), yes)
+ENV_VARS += -DUSE_JSONB
+OBJS += jsonb_encode.o
+else
+ENV_VARS += -DUSE_LIBJSONC
+OBJS += json_encode.o
+endif
+OBJS += osm_fdw.o
 
-set_v94:
-	$(eval VERSION = 9.4)
+EXTRA_CLEAN += json_encode.o jsonb_encode.o osm_to_json.o osm_to_json
 
-set_v93:
-	$(eval VERSION = 9.3)
+build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
-clean:
-	rm -rf osm_to_json osm_fdw.so osm_fdw--1.0.sql osm_fdw.control
-	make -C ./osm_reader clean
-	make -C ./osm_convert clean
-	make -C ./osm_fdw clean
+sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
+	cp $< $@
 
-osm_to_json:
-	make -C ./osm_reader objects
-	make -C ./osm_convert osm_to_json
-	mv ./osm_convert/osm_to_json ./osm_to_json
+$(READER_FOLDER)/fileformat.pb-c.c:
+	make -C $(READER_FOLDER) fileformat.pb-c.c
 
-osm_fdw.so:
-	make -C ./osm_reader objects VERSION=$(VERSION)
-	make -C ./osm_fdw osm_fdw.so VERSION=$(VERSION)
-	mv ./osm_fdw/osm_fdw.so ./osm_fdw.so
-	ln -s ./osm_fdw/osm_fdw--1.0.sql
-	ln -s ./osm_fdw/osm_fdw.control
+fileformat.pb-c.o: $(READER_FOLDER)/fileformat.pb-c.c
+	gcc -c $(FC) $(F_PROTO) $(READER_FOLDER)/fileformat.pb-c.c
 
-install: osm_fdw.so
-	rm -rf $(EXTENSIONS_FOLDER)/osm_fdw--1.0.sql $(EXTENSIONS_FOLDER)/osm_fdw.control $(LIB_FOLDER)/osm_fdw.so
-	ln -s $(CURRENT_FOLDER)/osm_fdw--1.0.sql $(EXTENSIONS_FOLDER)/osm_fdw--1.0.sql
-	ln -s $(CURRENT_FOLDER)/osm_fdw.control $(EXTENSIONS_FOLDER)/osm_fdw.control
-	ln -s $(CURRENT_FOLDER)/osm_fdw.so $(LIB_FOLDER)/osm_fdw.so
+$(READER_FOLDER)/osmformat.pb-c.c:
+	make -C $(READER_FOLDER) osmformat.pb-c.c
+
+osmformat.pb-c.o: $(READER_FOLDER)/osmformat.pb-c.c
+	gcc -c $(FC) $(F_PROTO) $(READER_FOLDER)/osmformat.pb-c.c
+
+zdecode.o:
+	gcc -c $(FC) $(F_Z) $(READER_FOLDER)/zdecode.c
+
+type_defs.o:
+	gcc -c $(FC) $(READER_FOLDER)/type_defs.c
+
+json_encode.o:
+	gcc -c $(FC) $(F_JSON) $(READER_FOLDER)/json_encode.c
+
+jsonb_encode.o:
+	gcc -c $(FC) $(F_PG) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/jsonb_encode.c
+
+osm_reader.o:
+	gcc -c $(FC) $(READER_FOLDER)/osm_reader.c
+
+osm_fdw.o:
+	gcc -c $(FC) $(F_PG) $(F_JSON) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/osm_fdw.c
+
+CONVERTER_OBJS = osm_reader.o
+CONVERTER_OBJS += type_defs.o
+CONVERTER_OBJS += zdecode.o
+CONVERTER_OBJS += fileformat.pb-c.o
+CONVERTER_OBJS += osmformat.pb-c.o
+CONVERTER_OBJS += json_encode.o
+
+osm_to_json.o:
+	gcc -c $(FC) $(F_JSON) -I$(READER_FOLDER) $(CONVERTER_FOLDER)/osm_to_json.c
+
+osm_to_json: osm_to_json.o $(CONVERTER_OBJS)
+	gcc $(FC) $(F_LD) -o osm_to_json -I$(READER_FOLDER) osm_to_json.o $(CONVERTER_OBJS)
+
+
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)
