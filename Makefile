@@ -27,6 +27,7 @@ EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 CURRENT_FOLDER = $(shell pwd)
 READER_FOLDER = $(CURRENT_FOLDER)/src/osm_reader
 FDW_FOLDER = $(CURRENT_FOLDER)/src/osm_fdw
+CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 
 FC = -g -fpic
 F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
@@ -34,9 +35,10 @@ F_Z = $(shell pkg-config --cflags zlib)
 F_JSON = $(shell pkg-config --cflags json-c)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-SHLIB_LINK = $(shell pkg-config --libs json-c)
-SHLIB_LINK += $(shell pkg-config --libs libprotobuf-c)
-SHLIB_LINK += $(shell pkg-config --libs zlib)
+F_LD = $(shell pkg-config --libs json-c)
+F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD += $(shell pkg-config --libs zlib)
+SHLIB_LINK = $(F_LD)
 
 OBJS = osm_reader.o
 OBJS += type_defs.o
@@ -52,7 +54,7 @@ OBJS += json_encode.o
 endif
 OBJS += osm_fdw.o
 
-EXTRA_CLEAN += json_encode.o jsonb_encode.o
+EXTRA_CLEAN += json_encode.o jsonb_encode.o osm_to_json.o osm_to_json
 
 build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
@@ -88,6 +90,20 @@ osm_reader.o:
 
 osm_fdw.o:
 	gcc -c $(FC) $(F_PG) $(F_JSON) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/osm_fdw.c
+
+CONVERTER_OBJS = osm_reader.o
+CONVERTER_OBJS += type_defs.o
+CONVERTER_OBJS += zdecode.o
+CONVERTER_OBJS += fileformat.pb-c.o
+CONVERTER_OBJS += osmformat.pb-c.o
+CONVERTER_OBJS += json_encode.o
+
+osm_to_json.o:
+	gcc -c $(FC) $(F_JSON) -I$(READER_FOLDER) $(CONVERTER_FOLDER)/osm_to_json.c
+
+osm_to_json: osm_to_json.o $(CONVERTER_OBJS)
+	gcc $(FC) $(F_LD) -o osm_to_json -I$(READER_FOLDER) osm_to_json.o $(CONVERTER_OBJS)
+
 
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
