@@ -4,12 +4,12 @@ OSM PBF Foreign Data Wrapper
 Synopsis
 --------
 
-  Openstreetmap PBF foreign data wrapper for PostgreSQL
+Openstreetmap PBF foreign data wrapper for PostgreSQL
 
 Description
 -----------
 
-    This extension allows to read openstreetmap PBF files directly from PostgreSQL.
+This extension allows to read openstreetmap PBF files directly from PostgreSQL.
 
 Usage
 -----
@@ -51,14 +51,14 @@ Find more examples here: [examples](https://bitbucket.org/vpikulik/postgres_osm_
 Table structure
 ---------------
 
-The table should have the same structure as in example.
+The table should have the same structure as in the example.
 Openstreetmap has 3 main object types: NODE, WAY and RELATION.
-The table row is a container that can contain all this 3 types.
-Column `type` is text column and shows type of the openstreetmap object (`NODE`, `WAY`, `RELATION`)
+The table row is a container that can contain all OSM types.
+Column `type` is a text column and shows type of the openstreetmap object (`NODE`, `WAY`, `RELATION`)
 
-Columns version, changeset, user_id, username, visible are informative and not empty for all objects.
+Columns `version`, `changeset`, `user_id`, `username`, `visible` are informative and not empty for all object types.
 
-List of columns for every object type:
+List of used columns for every object type:
 
 1. Node ([OSM NODE](http://wiki.openstreetmap.org/wiki/Node "Node"))
     * id
@@ -89,7 +89,9 @@ Support
 
   ([Issues trackes](https://bitbucket.org/vpikulik/postgres_osm_pbf_fdw/issues?status=new&status=open "Issues tracker"))
 
+  Email: v.pikulik@gmail.com
+
 Author
 ------
 
-    Vitali Pikulik
+    Vitali Pikulik <v.pikulik@gmail.com>
