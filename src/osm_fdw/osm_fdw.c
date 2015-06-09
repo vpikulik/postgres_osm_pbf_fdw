@@ -11,6 +11,7 @@
 #include "utils/array.h"
 #include "utils/builtins.h"
 #include "utils/rel.h" // RelationGetRelid
+#include "utils/timestamp.h"
 #include "access/reloptions.h" // untransformRelOptions
 #include "catalog/pg_foreign_table.h" // ForeignTableRelationId
 
@@ -243,20 +244,24 @@ IterateForeignScan (ForeignScanState *node){
     slot->tts_values[7] = Int32GetDatum(version);
     slot->tts_isnull[7] = false;
 
-    int64 changeset = (int64)item->changeset;
-    slot->tts_values[8] = Int64GetDatum(changeset);
+    Timestamp changed = (Timestamp)(1433887055);
+    slot->tts_values[8] = TimestampGetDatum(changed);
     slot->tts_isnull[8] = false;
 
-    int32 uid = (int32)item->uid;
-    slot->tts_values[9] = Int32GetDatum(uid);
+    int64 changeset = (int64)item->changeset;
+    slot->tts_values[9] = Int64GetDatum(changeset);
     slot->tts_isnull[9] = false;
 
-    text *username = cstring_to_text(item->user);
-    slot->tts_values[10] = PointerGetDatum(username);
+    int32 uid = (int32)item->uid;
+    slot->tts_values[10] = Int32GetDatum(uid);
     slot->tts_isnull[10] = false;
 
-    slot->tts_values[11] = BoolGetDatum(item->visible);
+    text *username = cstring_to_text(item->user);
+    slot->tts_values[11] = PointerGetDatum(username);
     slot->tts_isnull[11] = false;
+
+    slot->tts_values[12] = BoolGetDatum(item->visible);
+    slot->tts_isnull[12] = false;
 
     return ExecStoreVirtualTuple(slot);
 };
