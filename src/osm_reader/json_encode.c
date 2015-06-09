@@ -96,8 +96,14 @@ char* encode_item(OsmItem* item) {
         json_object_object_add(jitem, "members", jmembers);
     }
 
+    time_t changed = (time_t) item->timestamp;
+    char changed_date[80];
+    struct tm ts;
+    ts = *gmtime(&changed);
+    strftime(changed_date, sizeof(changed_date), "%a %Y-%m-%d %H:%M:%S %Z", &ts);
+
     json_object_object_add(jitem, "version", json_object_new_int(item->version));
-    json_object_object_add(jitem, "timestamp", json_object_new_int64(item->timestamp));
+    json_object_object_add(jitem, "timestamp", json_object_new_string(changed_date));
     json_object_object_add(jitem, "changeset", json_object_new_int64(item->changeset));
     json_object_object_add(jitem, "uid", json_object_new_int(item->uid));
     // char* user = (char*)malloc(sizeof(char)*(strlen(item->user)+1));

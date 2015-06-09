@@ -48,7 +48,7 @@ typedef struct {
     OsmMember **members;
 
     int32_t version;
-    int64_t timestamp;
+    double timestamp;
     int64_t changeset;
     int32_t uid;
     char *user;
