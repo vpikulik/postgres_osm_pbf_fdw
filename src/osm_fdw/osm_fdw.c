@@ -244,7 +244,8 @@ IterateForeignScan (ForeignScanState *node){
     slot->tts_values[7] = Int32GetDatum(version);
     slot->tts_isnull[7] = false;
 
-    Timestamp changed = (Timestamp)(1433887055);
+    pg_time_t changed_time = (pg_time_t)item->timestamp;
+    TimestampTz changed = time_t_to_timestamptz(changed_time);
     slot->tts_values[8] = TimestampGetDatum(changed);
     slot->tts_isnull[8] = false;
 
