@@ -25,5 +25,6 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data);
 
 void read_osm_header(Cursor* cursor, FILE* file);
 OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size);
+int get_osm_item_count(FILE* file, int file_size);
 
 #endif
