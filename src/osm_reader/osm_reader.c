@@ -96,14 +96,14 @@ double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block){
 };
 
 
-int64_t get_timestamp(int64_t timestamp, OSMPBF__PrimitiveBlock* primitive_block) {
+double get_timestamp(int64_t timestamp, OSMPBF__PrimitiveBlock* primitive_block) {
     int32_t granularity;
     if (primitive_block->has_date_granularity) {
         granularity = primitive_block->date_granularity;
     } else {
         granularity = 1000;
     };
-    return granularity * timestamp;
+    return granularity * timestamp / 1000;
 };
 
 

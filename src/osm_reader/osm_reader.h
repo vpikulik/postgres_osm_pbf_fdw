@@ -17,8 +17,6 @@ OSMPBF__BlobHeader* read_blob_header(FILE *file, int header_size);
 ResizedBuffer* read_blob(FILE* file, OSMPBF__BlobHeader* header);
 void read_osm_string_table(Cursor* cursor, OSMPBF__StringTable *stringtable);
 OSMPBF__HeaderBlock* read_osm_header_block(Cursor* cursor, ResizedBuffer* data);
-double get_lat(int64_t lat, OSMPBF__PrimitiveBlock* primitive_block);
-double get_lon(int64_t lon, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_dense_nodes(Cursor* cursor, OSMPBF__DenseNodes *dense, char** strings, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_way(Cursor* cursor, OSMPBF__Way *way, char** strings, OSMPBF__PrimitiveBlock* primitive_block);
 void read_osm_relation(Cursor* cursor, OSMPBF__Relation *relation, char** strings, OSMPBF__PrimitiveBlock* primitive_block);

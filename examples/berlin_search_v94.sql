@@ -12,6 +12,7 @@ CREATE FOREIGN TABLE osm_berlin (
     members json,
 
     version int,
+    modified timestamp,
     changeset bigint,
     user_id int,
     username text,

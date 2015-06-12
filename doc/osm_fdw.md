@@ -31,6 +31,7 @@ CREATE FOREIGN TABLE osm_malta (
     members jsonb,
 
     version int,
+    modified timestamp,
     changeset bigint,
     user_id int,
     username text,
@@ -56,7 +57,7 @@ Openstreetmap has 3 main object types: NODE, WAY and RELATION.
 The table row is a container that can contain all OSM types.
 Column `type` is a text column and shows type of the openstreetmap object (`NODE`, `WAY`, `RELATION`)
 
-Columns `version`, `changeset`, `user_id`, `username`, `visible` are informative and not empty for all object types.
+Columns `version`, `modified`, `changeset`, `user_id`, `username`, `visible` are informative and not empty for all object types.
 
 List of used columns for every object type:
 

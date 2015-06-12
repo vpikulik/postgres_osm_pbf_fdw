@@ -1,6 +1,7 @@
 
 #include <json.h>
 #include <string.h>
+#include <time.h>
 
 #include "type_defs.h"
 
