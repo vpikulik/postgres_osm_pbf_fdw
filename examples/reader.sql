@@ -17,6 +17,7 @@ CREATE FOREIGN TABLE osm_malta (
     members json,
 
     version int,
+    modified timestamp,
     changeset bigint,
     user_id int,
     username text,
@@ -36,6 +37,7 @@ CREATE FOREIGN TABLE osm_monaco (
     members json,
 
     version int,
+    modified timestamp,
     changeset bigint,
     user_id int,
     username text,
@@ -55,6 +57,7 @@ CREATE FOREIGN TABLE osm_belarus (
     members json,
 
     version int,
+    modified timestamp,
     changeset bigint,
     user_id int,
     username text,
