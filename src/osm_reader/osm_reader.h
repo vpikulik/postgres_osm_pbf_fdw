@@ -2,6 +2,8 @@
 #ifndef OSM_READER_INCLUDED
 #define OSM_READER_INCLUDED
 
+#define DEFAULT_BLOB_ITEMS_COUNT 8000
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +27,7 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data);
 
 void read_osm_header(Cursor* cursor, FILE* file);
 OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size);
-int get_osm_item_count(FILE* file, int file_size);
+int get_osm_items_count(FILE* file, int file_size);
+int estimate_items_count(FILE* file, int file_size);
 
 #endif

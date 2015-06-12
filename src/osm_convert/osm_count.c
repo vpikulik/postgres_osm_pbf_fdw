@@ -12,10 +12,14 @@ int main (int argc, const char * argv[]) {
     fseek(file, 0, SEEK_END);
     int file_size = ftell(file);
     printf("File size: %d\n", file_size);
-    fseek(file, 0, SEEK_SET);
 
-    int count = get_osm_item_count(file, file_size);
-    printf("Items count: %d\n", count);
+    fseek(file, 0, SEEK_SET);
+    int count = estimate_items_count(file, file_size);
+    printf("Estimated Items count: %d\n", count);
+
+    fseek(file, 0, SEEK_SET);
+    int estimated = get_osm_items_count(file, file_size);
+    printf("Items count: %d\n", estimated);
 
     fclose(file);
 }

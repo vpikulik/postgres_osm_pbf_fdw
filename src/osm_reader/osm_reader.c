@@ -367,7 +367,7 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
 }
 
 
-int get_osm_item_count(FILE* file, int file_size) {
+int get_osm_items_count(FILE* file, int file_size) {
     int step = 0;
     int count = 0;
     do {
@@ -395,6 +395,19 @@ int get_osm_item_count(FILE* file, int file_size) {
         osmpbf__blob_header__free_unpacked(header, NULL);
 
         step += 1;
+    } while (!check_eof(file, file_size));
+    return count;
+}
+
+
+int estimate_items_count(FILE* file, int file_size) {
+    int count = 0;
+    do {
+        int header_size = _read_header_size(file);
+        OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
+        fseek(file, header->datasize, SEEK_CUR);
+        osmpbf__blob_header__free_unpacked(header, NULL);
+        count += DEFAULT_BLOB_ITEMS_COUNT;
     } while (!check_eof(file, file_size));
     return count;
 }
