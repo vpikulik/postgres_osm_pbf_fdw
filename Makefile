@@ -54,7 +54,9 @@ OBJS += json_encode.o
 endif
 OBJS += osm_fdw.o
 
-EXTRA_CLEAN += json_encode.o jsonb_encode.o osm_to_json.o osm_to_json
+EXTRA_CLEAN += json_encode.o jsonb_encode.o
+EXTRA_CLEAN += osm_to_json.o osm_to_json
+EXTRA_CLEAN += osm_count.o osm_count
 
 build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
@@ -103,6 +105,12 @@ osm_to_json.o:
 
 osm_to_json: osm_to_json.o $(CONVERTER_OBJS)
 	gcc $(FC) $(F_LD) -o osm_to_json -I$(READER_FOLDER) osm_to_json.o $(CONVERTER_OBJS)
+
+osm_count.o:
+	gcc -c $(FC) $(F_JSON) -I$(READER_FOLDER) $(CONVERTER_FOLDER)/osm_count.c
+
+osm_count: osm_count.o $(CONVERTER_OBJS)
+	gcc $(FC) $(F_LD) -o osm_count -I$(READER_FOLDER) osm_count.o $(CONVERTER_OBJS)
 
 
 PGXS := $(shell $(PG_CONFIG) --pgxs)

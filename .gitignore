@@ -3,5 +3,6 @@
 *.so
 sql/osm_fdw--*.sql
 osm_to_json
+osm_count
 osm_fdw_slides/index.html
 .env

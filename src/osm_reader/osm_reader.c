@@ -293,14 +293,19 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
         read_osm_primitive_group(cursor, primitive_block->primitivegroup[i], cursor->strings, primitive_block);
     }
     osmpbf__primitive_block__free_unpacked(primitive_block, NULL);
-};
+}
+
+
+int _read_header_size(FILE* file) {
+    int header_size;
+    fread(&header_size, 4, 1, file);
+    return ntohl(header_size);
+}
 
 
 void _load_data_from_file(Cursor* cursor, FILE* file, short read_header) {
     // Read size of header
-    int header_size;
-    fread(&header_size, 4, 1, file);
-    header_size = ntohl(header_size);
+    int header_size = _read_header_size(file);
 
     //Read header
     OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
@@ -343,7 +348,7 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
         do {
             clear_cursor(cursor);
             _load_data_from_file(cursor, file, 0);
-        } while (cursor->items_count == 0 && !check_eof(file,file_size));
+        } while (cursor->items_count == 0 && !check_eof(file, file_size));
         cursor->position = 0;
     }
 
@@ -359,4 +364,50 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
         }
         return item;
     }
+}
+
+
+int get_osm_items_count(FILE* file, int file_size) {
+    int step = 0;
+    int count = 0;
+    do {
+        int header_size = _read_header_size(file);
+        OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
+        ResizedBuffer* blob_data = read_blob(file, header);
+
+        if (step > 0) {
+            OSMPBF__PrimitiveBlock* primitive_block = osmpbf__primitive_block__unpack(NULL, blob_data->size, blob_data->data);
+
+            int i;
+            for (i=0; i<primitive_block->n_primitivegroup; i++) {
+                OSMPBF__PrimitiveGroup *primitive_group = primitive_block->primitivegroup[i];
+                if (primitive_group->dense) {
+                    count += primitive_group->dense->n_id;
+                }
+                count += primitive_group->n_ways;
+                count += primitive_group->n_relations;
+            }
+
+            osmpbf__primitive_block__free_unpacked(primitive_block, NULL);
+        }
+
+        free_resized_buffer(blob_data);
+        osmpbf__blob_header__free_unpacked(header, NULL);
+
+        step += 1;
+    } while (!check_eof(file, file_size));
+    return count;
+}
+
+
+int estimate_items_count(FILE* file, int file_size) {
+    int count = 0;
+    do {
+        int header_size = _read_header_size(file);
+        OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
+        fseek(file, header->datasize, SEEK_CUR);
+        osmpbf__blob_header__free_unpacked(header, NULL);
+        count += DEFAULT_BLOB_ITEMS_COUNT;
+    } while (!check_eof(file, file_size));
+    return count;
 }

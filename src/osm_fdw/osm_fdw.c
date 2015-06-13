@@ -28,8 +28,6 @@ PG_MODULE_MAGIC;
 #include "jsonb_encode.h"
 #endif
 
-#define ROWS_COUNT 8000*1000
-
 
 typedef struct FdwExecutionState
 {
@@ -72,7 +70,17 @@ void
 GetForeignRelSize (PlannerInfo *root,
                    RelOptInfo *baserel,
                    Oid foreigntableid) {
-    baserel->rows = ROWS_COUNT;
+
+    char* filename = get_file_name(foreigntableid);
+    FILE *file = fopen(filename, "r");
+
+    fseek(file, 0, SEEK_END);
+    int file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    baserel->rows = estimate_items_count(file, file_size);
+
+    fclose(file);
 };
 
 void
@@ -85,7 +93,7 @@ GetForeignPaths (PlannerInfo *root,
     Cost cpu_per_tuple = cpu_tuple_cost * 10 + baserel->baserestrictcost.per_tuple;
 
     // run_cost += seq_page_cost * pages;
-    run_cost += cpu_per_tuple * ROWS_COUNT;
+    run_cost += cpu_per_tuple * baserel->rows;
 
     Cost total_cost = startup_cost + run_cost;
 
