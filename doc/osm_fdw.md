@@ -47,7 +47,7 @@ SELECT count(*) FROM osm_malta WHERE type='NODE';
 
 ```
 
-Find more examples here: [examples](https://bitbucket.org/vpikulik/postgres_osm_pbf_fdw/src/d4b8a97fffd9ab5df538a78c1b2967b71a551f80/examples/ "osm fdw examples")
+Find more examples here: [examples](https://github.com/vpikulik/postgres_osm_pbf_fdw/tree/master/examples "osm fdw examples")
 
 Table structure
 ---------------
@@ -88,7 +88,7 @@ List of used columns for every object type:
 Support
 -------
 
-  ([Issues trackes](https://bitbucket.org/vpikulik/postgres_osm_pbf_fdw/issues?status=new&status=open "Issues tracker"))
+  ([Issues trackes](https://github.com/vpikulik/postgres_osm_pbf_fdw/issues "Issues tracker"))
 
   Email: v.pikulik@gmail.com
 
