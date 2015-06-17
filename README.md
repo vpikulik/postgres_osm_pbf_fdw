@@ -24,8 +24,12 @@ sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c2 libprotobuf-
 
 Compile extension and install:
 ```bash
-make
 sudo make install
 ```
 
-Check [examples](https://bitbucket.org/vpikulik/postgres_osm_pbf_fdw/src/c45bc4c5b209e6d5ef1454e010b687f67445f7bc/examples/?at=master "osm fdw examples")
+`pg_config` can be specified:
+```bash
+sudo make PG_CONFIG=/usr/lib/postgresql/9.4/bin/pg_config install
+```
+
+Check [examples](https://github.com/vpikulik/postgres_osm_pbf_fdw/tree/master/examples "osm fdw examples")

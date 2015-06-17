@@ -24,13 +24,14 @@ OPTIONS (
 );
 
 CREATE MATERIALIZED VIEW berlin_osm_data AS
-    SELECT id, type, lat, lon, tags, refs, members FROM osm_berlin WHERE tags IS NOT NULL
+    SELECT id, type, lat, lon, tags, refs, members as index_text FROM osm_berlin WHERE text_index_from_json(tags) != ''
     WITH DATA;
 
 
 CREATE OR REPLACE FUNCTION text_index_from_json(data jsonb) RETURNS text AS $$
-    SELECT string_agg(value, ' ')
-        FROM (SELECT key, value FROM jsonb_each_text(data)) as data_keys;
+    SELECT string_agg(value->>0, ' ')
+        FROM jsonb_each(data)
+        WHERE key LIKE 'name%' OR key LIKE 'addr:%';
 $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION berlin_osm_search(text_query text) RETURNS TABLE(id bigint, type text) AS $$
