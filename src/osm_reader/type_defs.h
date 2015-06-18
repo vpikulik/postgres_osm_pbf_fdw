@@ -2,6 +2,8 @@
 #ifndef TYPE_DEFS_INCLUDED
 #define TYPE_DEFS_INCLUDED
 
+#define file_size_t unsigned long
+
 #include <stdlib.h>
 #include <string.h>
 
