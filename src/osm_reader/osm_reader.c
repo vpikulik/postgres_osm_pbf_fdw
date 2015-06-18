@@ -330,7 +330,7 @@ void read_osm_header(Cursor* cursor, FILE* file) {
 }
 
 
-short int check_eof(FILE* file, int file_size) {
+short int check_eof(FILE* file, unsigned long file_size) {
     if (ftell(file) >= file_size) {
         return 1;
     } else {
@@ -339,7 +339,7 @@ short int check_eof(FILE* file, int file_size) {
 }
 
 
-OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
+OsmItem* read_osm_item(Cursor* cursor, FILE* file, unsigned long file_size) {
 
     if (cursor->position == -1) {
         if (check_eof(file,file_size)) {
@@ -367,7 +367,7 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
 }
 
 
-int get_osm_items_count(FILE* file, int file_size) {
+int get_osm_items_count(FILE* file, unsigned long file_size) {
     int step = 0;
     int count = 0;
     do {
@@ -400,7 +400,7 @@ int get_osm_items_count(FILE* file, int file_size) {
 }
 
 
-int estimate_items_count(FILE* file, int file_size) {
+int estimate_items_count(FILE* file, unsigned long file_size) {
     int count = 0;
     do {
         int header_size = _read_header_size(file);

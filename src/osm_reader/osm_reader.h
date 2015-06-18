@@ -26,8 +26,8 @@ void read_osm_primitive_group(Cursor* cursor, OSMPBF__PrimitiveGroup *primitive_
 void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data);
 
 void read_osm_header(Cursor* cursor, FILE* file);
-OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size);
-int get_osm_items_count(FILE* file, int file_size);
-int estimate_items_count(FILE* file, int file_size);
+OsmItem* read_osm_item(Cursor* cursor, FILE* file, unsigned long file_size);
+int get_osm_items_count(FILE* file, unsigned long file_size);
+int estimate_items_count(FILE* file, unsigned long file_size);
 
 #endif
