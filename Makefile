@@ -54,6 +54,8 @@ OBJS += json_encode.o
 endif
 OBJS += osm_fdw.o
 
+EXTRA_CLEAN += $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/fileformat.pb-c.h
+EXTRA_CLEAN += $(READER_FOLDER)/osmformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.h
 EXTRA_CLEAN += json_encode.o jsonb_encode.o
 EXTRA_CLEAN += osm_to_json.o osm_to_json
 EXTRA_CLEAN += osm_count.o osm_count
@@ -87,7 +89,7 @@ json_encode.o:
 jsonb_encode.o:
 	gcc -c $(FC) $(F_PG) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/jsonb_encode.c
 
-osm_reader.o:
+osm_reader.o: $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.c
 	gcc -c $(FC) $(READER_FOLDER)/osm_reader.c
 
 osm_fdw.o:
