@@ -296,7 +296,7 @@ void read_osm_primitive_block(Cursor* cursor, ResizedBuffer *data){
 }
 
 
-int _read_header_size(FILE* file) {
+size_t _read_header_size(FILE* file) {
     int header_size;
     fread(&header_size, 4, 1, file);
     return ntohl(header_size);
@@ -330,7 +330,7 @@ void read_osm_header(Cursor* cursor, FILE* file) {
 }
 
 
-short int check_eof(FILE* file, int file_size) {
+short int check_eof(FILE* file, file_size_t file_size) {
     if (ftell(file) >= file_size) {
         return 1;
     } else {
@@ -339,7 +339,7 @@ short int check_eof(FILE* file, int file_size) {
 }
 
 
-OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
+OsmItem* read_osm_item(Cursor* cursor, FILE* file, file_size_t file_size) {
 
     if (cursor->position == -1) {
         if (check_eof(file,file_size)) {
@@ -367,11 +367,11 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, int file_size) {
 }
 
 
-int get_osm_items_count(FILE* file, int file_size) {
+int get_osm_items_count(FILE* file, file_size_t file_size) {
     int step = 0;
     int count = 0;
     do {
-        int header_size = _read_header_size(file);
+        size_t header_size = _read_header_size(file);
         OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
         ResizedBuffer* blob_data = read_blob(file, header);
 
@@ -400,10 +400,10 @@ int get_osm_items_count(FILE* file, int file_size) {
 }
 
 
-int estimate_items_count(FILE* file, int file_size) {
+int estimate_items_count(FILE* file, file_size_t file_size) {
     int count = 0;
     do {
-        int header_size = _read_header_size(file);
+        size_t header_size = _read_header_size(file);
         OSMPBF__BlobHeader* header = read_blob_header(file, header_size);
         fseek(file, header->datasize, SEEK_CUR);
         osmpbf__blob_header__free_unpacked(header, NULL);

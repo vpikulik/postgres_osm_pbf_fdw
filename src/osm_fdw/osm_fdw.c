@@ -33,7 +33,7 @@ typedef struct FdwExecutionState
 {
     FILE* file;
     Cursor* cursor;
-    int file_size;
+    file_size_t file_size;
 } FdwExecutionState;
 
 
@@ -75,7 +75,7 @@ GetForeignRelSize (PlannerInfo *root,
     FILE *file = fopen(filename, "r");
 
     fseek(file, 0, SEEK_END);
-    int file_size = ftell(file);
+    file_size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     baserel->rows = estimate_items_count(file, file_size);

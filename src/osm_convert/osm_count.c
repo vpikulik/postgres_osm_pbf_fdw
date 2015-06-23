@@ -10,8 +10,8 @@ int main (int argc, const char * argv[]) {
     FILE *file = fopen(argv[1], "r");
 
     fseek(file, 0, SEEK_END);
-    int file_size = ftell(file);
-    printf("File size: %d\n", file_size);
+    unsigned long file_size = ftell(file);
+    printf("File size: %e\n", file_size);
 
     fseek(file, 0, SEEK_SET);
     int count = estimate_items_count(file, file_size);
