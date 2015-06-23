@@ -71,6 +71,7 @@ test: /tmp/monaco.osm.pbf
 	pg_prove -p $(TEST_PORT) tests/smoke.sql
 
 /tmp/monaco.osm.pbf:
+	rm -rf /tmp/monaco.osm.pbf
 	cp data/monaco.osm.pbf /tmp/
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql

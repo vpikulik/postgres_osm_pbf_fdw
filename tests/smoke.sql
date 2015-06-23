@@ -12,26 +12,7 @@
 CREATE EXTENSION IF NOT EXISTS osm_fdw;
 DROP SERVER IF EXISTS osm_fdw_test_server CASCADE;
 CREATE SERVER osm_fdw_test_server FOREIGN DATA WRAPPER osm_fdw;
-CREATE FOREIGN TABLE osm_test_monaco (
-    id bigint,
-    type text,
-    lat double precision,
-    lon double precision,
-    tags jsonb,
-    refs bigint[],
-    members jsonb,
-
-    version int,
-    modified timestamp,
-    changeset bigint,
-    user_id int,
-    username text,
-    visible boolean
-)
-SERVER osm_fdw_test_server
-OPTIONS (
-    filename '/tmp/monaco.osm.pbf'
-);
+SELECT create_osm_table('osm_test_monaco', 'osm_fdw_test_server', '/tmp/monaco.osm.pbf');
 
 
 BEGIN;

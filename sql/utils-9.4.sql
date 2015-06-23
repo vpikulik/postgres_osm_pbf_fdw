@@ -1,7 +1,7 @@
 
-CREATE OR REPLACE LANGUAGE plpgsql;
+--CREATE OR REPLACE LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS create_osm_table(text,text);
-CREATE OR REPLACE FUNCTION create_osm_table(table_name text, file_name text) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION create_osm_table(table_name text, server_name text, file_name text) RETURNS void AS $$
 BEGIN
     EXECUTE 'CREATE FOREIGN TABLE ' || quote_ident(table_name) || ' (
         id bigint,
@@ -19,7 +19,7 @@ BEGIN
         username text,
         visible boolean
     )
-    SERVER osm_fdw_server
+    SERVER ' || quote_ident(server_name) || '
     OPTIONS (filename ' || quote_literal(file_name) || ');';
 END;
 $$ LANGUAGE plpgsql;
