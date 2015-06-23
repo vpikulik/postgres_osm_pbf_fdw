@@ -3,9 +3,9 @@ EXTVERSION   = $(shell grep default_version $(EXTENSION).control | sed -e "s/def
 
 DATA         = $(filter-out $(wildcard sql/*--*.sql),$(wildcard sql/*.sql))
 DOCS         = $(wildcard doc/*.md)
-TESTS        = $(wildcard test/sql/*.sql)
-REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
-REGRESS_OPTS = --inputdir=test --load-language=plpgsql
+# TESTS        = $(wildcard test/sql/*.sql)
+# REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+# REGRESS_OPTS = --inputdir=test --load-language=plpgsql
 MODULE_big      = $(EXTENSION)
 
 #
@@ -16,6 +16,8 @@ MODULE_big      = $(EXTENSION)
 PG_CONFIG    = pg_config
 PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
 PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
+
+TEST_PORT = 5432
 
 #ifeq ($(PG94),yes)
 
@@ -59,8 +61,15 @@ EXTRA_CLEAN += $(READER_FOLDER)/osmformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c
 EXTRA_CLEAN += json_encode.o jsonb_encode.o
 EXTRA_CLEAN += osm_to_json.o osm_to_json
 EXTRA_CLEAN += osm_count.o osm_count
+EXTRA_CLEAN += /tmp/monaco.osm.pbf
 
 build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
+
+test: /tmp/monaco.osm.pbf
+	pg_prove -p $(TEST_PORT) tests/smoke.sql
+
+/tmp/monaco.osm.pbf:
+	cp data/monaco.osm.pbf /tmp/
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
 	cp $< $@
