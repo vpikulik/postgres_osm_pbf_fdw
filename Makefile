@@ -17,6 +17,7 @@ PG_CONFIG    = pg_config
 PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
 PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
 
+TEST_DATABASE = osm_test_db
 TEST_PORT = 5432
 
 #ifeq ($(PG94),yes)
@@ -68,7 +69,7 @@ EXTRA_CLEAN += /tmp/monaco.osm.pbf
 build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
 test: /tmp/monaco.osm.pbf
-	pg_prove -p $(TEST_PORT) tests/smoke.sql
+	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
 
 /tmp/monaco.osm.pbf:
 	rm -rf /tmp/monaco.osm.pbf
