@@ -50,9 +50,11 @@ OBJS += osmformat.pb-c.o
 ifeq ($(PG94), yes)
 ENV_VARS += -DUSE_JSONB
 OBJS += jsonb_encode.o
+UTILS_FILE = sql/utils-9.4.sql
 else
 ENV_VARS += -DUSE_LIBJSONC
 OBJS += json_encode.o
+UTILS_FILE = sql/utils-9.3.sql
 endif
 OBJS += osm_fdw.o
 
@@ -72,7 +74,7 @@ test: /tmp/monaco.osm.pbf
 	cp data/monaco.osm.pbf /tmp/
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
-	cp $< $@
+	cat $< $(UTILS_FILE) > $@
 
 $(READER_FOLDER)/fileformat.pb-c.c:
 	make -C $(READER_FOLDER) fileformat.pb-c.c
