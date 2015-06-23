@@ -33,13 +33,14 @@ FDW_FOLDER = $(CURRENT_FOLDER)/src/osm_fdw
 CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 
 FC = -g -fpic
-F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
+#F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
 F_Z = $(shell pkg-config --cflags zlib)
-F_JSON = $(shell pkg-config --cflags json-c)
+F_JSON = $(shell pkg-config --cflags json)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-F_LD = $(shell pkg-config --libs json-c)
-F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD = $(shell pkg-config --libs json)
+#F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD += -lprotobuf-c
 F_LD += $(shell pkg-config --libs zlib)
 SHLIB_LINK = $(F_LD)
 
