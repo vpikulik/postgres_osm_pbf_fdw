@@ -1,0 +1,34 @@
+language: c
+
+addons:
+  postgresql:
+    - 9.3
+    - 9.4
+
+env:
+  - PG_VERSION=9.3 PG_PORT=5432 PGUSER=postgres
+  - PG_VERSION=9.4 PG_PORT=5432 PGUSER=postgres
+
+before_install:
+  - sudo service postgresql stop
+  - sudo pg_ctlcluster $PG_VERSION main start
+  - sudo pg_lsclusters
+
+install:
+  - git clone https://github.com/json-c/json-c.git && cd json-c && git checkout json-c-0.11
+  - sh autogen.sh && ./configure && make && sudo make install
+  - cd ..
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq postgresql-server-dev-$PG_VERSION libprotobuf-c0-dev libprotobuf-c0 protobuf-c-compiler zlib1g-dev zlib1g
+  - sudo apt-get install -qq python-setuptools libtap-parser-sourcehandler-pgtap-perl pgtap
+  - sudo easy_install pgxnclient
+  - sudo pgxn install pgtap
+  - psql -p $PG_PORT -c 'CREATE DATABASE osm_test_db;'
+  - psql -p $PG_PORT -d osm_test_db -c 'CREATE EXTENSION pgtap;'
+
+before_script:
+  - sudo make PG_CONFIG=/usr/lib/postgresql/$PG_VERSION/bin/pg_config install
+
+script:
+  - make test TEST_PORT=$PG_PORT TEST_DATABASE=osm_test_db |& tee /tmp/pgprove.log
+  - "grep -q '^Result: PASS' /tmp/pgprove.log"

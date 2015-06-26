@@ -3,9 +3,9 @@ EXTVERSION   = $(shell grep default_version $(EXTENSION).control | sed -e "s/def
 
 DATA         = $(filter-out $(wildcard sql/*--*.sql),$(wildcard sql/*.sql))
 DOCS         = $(wildcard doc/*.md)
-TESTS        = $(wildcard test/sql/*.sql)
-REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
-REGRESS_OPTS = --inputdir=test --load-language=plpgsql
+# TESTS        = $(wildcard test/sql/*.sql)
+# REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+# REGRESS_OPTS = --inputdir=test --load-language=plpgsql
 MODULE_big      = $(EXTENSION)
 
 #
@@ -16,6 +16,9 @@ MODULE_big      = $(EXTENSION)
 PG_CONFIG    = pg_config
 PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
 PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
+
+TEST_DATABASE = osm_test_db
+TEST_PORT = 5432
 
 #ifeq ($(PG94),yes)
 
@@ -30,13 +33,14 @@ FDW_FOLDER = $(CURRENT_FOLDER)/src/osm_fdw
 CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 
 FC = -g -fpic
-F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
+#F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
 F_Z = $(shell pkg-config --cflags zlib)
-F_JSON = $(shell pkg-config --cflags json-c)
+F_JSON = $(shell pkg-config --cflags json)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-F_LD = $(shell pkg-config --libs json-c)
-F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD = $(shell pkg-config --libs json)
+#F_LD += $(shell pkg-config --libs libprotobuf-c)
+F_LD += -lprotobuf-c
 F_LD += $(shell pkg-config --libs zlib)
 SHLIB_LINK = $(F_LD)
 
@@ -48,9 +52,11 @@ OBJS += osmformat.pb-c.o
 ifeq ($(PG94), yes)
 ENV_VARS += -DUSE_JSONB
 OBJS += jsonb_encode.o
+UTILS_FILE = sql/utils-9.4.sql
 else
 ENV_VARS += -DUSE_LIBJSONC
 OBJS += json_encode.o
+UTILS_FILE = sql/utils-9.3.sql
 endif
 OBJS += osm_fdw.o
 
@@ -59,11 +65,19 @@ EXTRA_CLEAN += $(READER_FOLDER)/osmformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c
 EXTRA_CLEAN += json_encode.o jsonb_encode.o
 EXTRA_CLEAN += osm_to_json.o osm_to_json
 EXTRA_CLEAN += osm_count.o osm_count
+EXTRA_CLEAN += /tmp/monaco.osm.pbf
 
 build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
+test: /tmp/monaco.osm.pbf
+	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
+
+/tmp/monaco.osm.pbf:
+	rm -rf /tmp/monaco.osm.pbf
+	cp data/monaco.osm.pbf /tmp/
+
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
-	cp $< $@
+	cat $< $(UTILS_FILE) > $@
 
 $(READER_FOLDER)/fileformat.pb-c.c:
 	make -C $(READER_FOLDER) fileformat.pb-c.c

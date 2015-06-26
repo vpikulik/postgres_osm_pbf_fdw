@@ -2,26 +2,7 @@
 DROP MATERIALIZED VIEW IF EXISTS berlin_osm_data;
 DROP FOREIGN TABLE IF EXISTS osm_berlin;
 
-CREATE FOREIGN TABLE osm_berlin (
-    id bigint,
-    type text,
-    lat double precision,
-    lon double precision,
-    tags jsonb,
-    refs bigint[],
-    members json,
-
-    version int,
-    modified timestamp,
-    changeset bigint,
-    user_id int,
-    username text,
-    visible boolean
-)
-SERVER osm_fdw_server
-OPTIONS (
-    filename '/mnt/media/berlin-latest.osm.pbf'
-);
+SELECT create_osm_table('osm_berlin', 'osm_fdw_server', '/mnt/media/berlin-latest.osm.pbf');
 
 CREATE MATERIALIZED VIEW berlin_osm_data AS
     SELECT id, type, lat, lon, tags, refs, members as index_text FROM osm_berlin WHERE text_index_from_json(tags) != ''
