@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Postgres osm pbf fdw by vpikulik</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Postgres osm pbf fdw</h1>
+          <h2>OSM PBF Foreign Data Wrapper</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/vpikulik/postgres_osm_pbf_fdw/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/vpikulik/postgres_osm_pbf_fdw/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/vpikulik/postgres_osm_pbf_fdw" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="osm-pbf-foreign-data-wrapper" class="anchor" href="#osm-pbf-foreign-data-wrapper" aria-hidden="true"><span class="octicon octicon-link"></span></a>OSM PBF Foreign Data Wrapper</h1>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>This extension for PostgreSQL implements <a href="https://wiki.postgresql.org/wiki/Foreign_data_wrappers" title="Openstreetmap pbf foreign data wrapper">Foreign Data Wrapper</a> (FDW) for reading <a href="http://wiki.openstreetmap.org/wiki/PBF_Format" title="Openstreetmap PBF">Openstreetmap PBF</a> file format (*.osm.pbf)</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<pre><code>* postgresql version 9.3 or 9.4
+* libprotobuf-c
+* json-c &gt;= 0.11
+* zlib
+</code></pre>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<h3>
+<a id="how-to-install-in-debian-8" class="anchor" href="#how-to-install-in-debian-8" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to install in Debian 8</h3>
+
+<div class="highlight highlight-bash"><pre>sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c2 libprotobuf-c-dev libprotobuf-c-compiler libprotobuf-c1 zlib1g-dev zlib1g
+sudo make install</pre></div>
+
+<h3>
+<a id="how-to-install-in-ubuntu-1204" class="anchor" href="#how-to-install-in-ubuntu-1204" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to install in Ubuntu 12.04</h3>
+
+<p>Install <a href="https://github.com/json-c/json-c/tree/json-c-0.11" title="json-c">json-c</a> at first (Ubuntu 12.04 has the old version)</p>
+
+<div class="highlight highlight-bash"><pre>git clone https://github.com/json-c/json-c.git
+<span class="pl-c1">cd</span> json-c
+git checkout json-c-0.11</pre></div>
+
+<p>Compile and install osm_fdw</p>
+
+<pre><code>sh autogen.sh
+./configure
+make
+sudo make install
+</code></pre>
+
+<h3>
+<a id="install-with-pgxn" class="anchor" href="#install-with-pgxn" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install with PGXN</h3>
+
+<p>Install required packages before and next run:</p>
+
+<div class="highlight highlight-bash"><pre>sudo pgxn install osm_fdw</pre></div>
+
+<h3>
+<a id="addition-parameters" class="anchor" href="#addition-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Addition parameters</h3>
+
+<p>If you want to use not default version of postgres in you system, you can specify <code>pg_config</code></p>
+
+<div class="highlight highlight-bash"><pre>sudo make PG_CONFIG=/usr/lib/postgresql/9.4/bin/pg_config install</pre></div>
+
+<h2>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p>Find more documentation here: <a href="https://github.com/vpikulik/postgres_osm_pbf_fdw/blob/master/doc/osm_fdw.md" title="Openstreetmap foreign data wrapper documentation">osm_fdw doc</a></p>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<p>Find more examples here: <a href="https://github.com/vpikulik/postgres_osm_pbf_fdw/tree/master/examples" title="Openstreetmap foreign data wrapper examples">examples</a></p>
+
+<h2>
+<a id="support" class="anchor" href="#support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support</h2>
+
+<p>(<a href="https://github.com/vpikulik/postgres_osm_pbf_fdw/issues" title="Issues tracker">Issues trackes</a>)
+Email: <a href="mailto:v.pikulik@gmail.com">v.pikulik@gmail.com</a></p>
+
+<h2>
+<a id="author" class="anchor" href="#author" aria-hidden="true"><span class="octicon octicon-link"></span></a>Author</h2>
+
+<p>Vitali Pikulik <a href="mailto:v.pikulik@gmail.com">v.pikulik@gmail.com</a></p>
+        </section>
+
+        <footer>
+          Postgres osm pbf fdw is maintained by <a href="https://github.com/vpikulik">vpikulik</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
