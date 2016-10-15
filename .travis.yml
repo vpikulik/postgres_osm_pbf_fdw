@@ -2,12 +2,10 @@ language: c
 
 addons:
   postgresql:
-    - 9.3
-    - 9.4
+    - 9.5
 
 env:
-  - PG_VERSION=9.3 PG_PORT=5432 PGUSER=postgres
-  - PG_VERSION=9.4 PG_PORT=5432 PGUSER=postgres
+  - PG_VERSION=9.5 PG_PORT=5432 PGUSER=postgres
 
 before_install:
   - sudo service postgresql stop
