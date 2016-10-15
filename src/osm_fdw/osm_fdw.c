@@ -107,6 +107,7 @@ GetForeignPaths (PlannerInfo *root,
             total_cost,
             NIL,
             NULL,
+            NULL,
             baserel->fdw_private
         )
     );
@@ -118,7 +119,8 @@ GetForeignPlan (PlannerInfo *root,
                 Oid foreigntableid,
                 ForeignPath *best_path,
                 List *tlist,
-                List *scan_clauses) {
+                List *scan_clauses,
+                Plan *outer_plan) {
 
     scan_clauses = extract_actual_clauses(scan_clauses, false);
 
@@ -127,7 +129,10 @@ GetForeignPlan (PlannerInfo *root,
         scan_clauses,
         baserel->relid,
         NIL,
-        best_path->fdw_private);
+        best_path->fdw_private,
+        NIL,
+        NIL,
+        outer_plan);
 };
 
 void

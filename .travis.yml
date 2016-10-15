@@ -2,17 +2,15 @@ language: c
 
 addons:
   postgresql:
-    - 9.3
-    - 9.4
+    - 9.5
 
 env:
-  - PG_VERSION=9.3 PG_PORT=5432 PGUSER=postgres
-  - PG_VERSION=9.4 PG_PORT=5432 PGUSER=postgres
+  - PG_VERSION=9.5 PG_PORT=5435 PGUSER=postgres
 
 before_install:
   - sudo service postgresql stop
-  - sudo pg_ctlcluster $PG_VERSION main start
-  - sudo pg_lsclusters
+  - sudo pg_createcluster -p 5435 $PG_VERSION osmtest
+  - sudo pg_ctlcluster $PG_VERSION osmtest start
 
 install:
   - git clone https://github.com/json-c/json-c.git && cd json-c && git checkout json-c-0.11
