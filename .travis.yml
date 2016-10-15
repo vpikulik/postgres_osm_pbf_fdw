@@ -9,8 +9,8 @@ env:
 
 before_install:
   - sudo service postgresql stop
-  - sudo pg_ctlcluster $PG_VERSION main start
   - sudo pg_lsclusters
+  - sudo pg_ctlcluster $PG_VERSION main start
 
 install:
   - git clone https://github.com/json-c/json-c.git && cd json-c && git checkout json-c-0.11
