@@ -57,8 +57,6 @@ EXTRA_CLEAN += osm_to_json.o osm_to_json
 EXTRA_CLEAN += osm_count.o osm_count
 EXTRA_CLEAN += /tmp/monaco.osm.pbf
 
-build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
-
 test: /tmp/monaco.osm.pbf
 	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
 
@@ -96,7 +94,7 @@ jsonb_encode.o:
 osm_reader.o: $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.c
 	gcc -c $(FC) $(READER_FOLDER)/osm_reader.c
 
-osm_fdw.o:
+osm_fdw.o: sql/$(EXTENSION)--$(EXTVERSION).sql
 	gcc -c $(FC) $(F_PG) $(F_JSON) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/osm_fdw.c
 
 CONVERTER_OBJS = osm_reader.o
