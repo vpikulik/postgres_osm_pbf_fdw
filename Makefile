@@ -46,8 +46,9 @@ OBJS += zdecode.o
 OBJS += fileformat.pb-c.o
 OBJS += osmformat.pb-c.o
 OBJS += jsonb_encode.o
-UTILS_FILE = sql/utils-9.4.sql
 OBJS += osm_fdw.o
+
+UTILS_FILE = sql/utils.sql
 
 EXTRA_CLEAN += $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/fileformat.pb-c.h
 EXTRA_CLEAN += $(READER_FOLDER)/osmformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.h

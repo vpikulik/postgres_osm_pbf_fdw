@@ -2,7 +2,7 @@
     "name": "osm_fdw",
     "abstract": "Openstreetmap PBF foreign data wrapper",
     "description": "This extension for PostgreSQL implements Foreign Data Wrapper (FDW) for reading Openstreetmap PBF file format (*.osm.pbf)",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "maintainer": "Vitali Pikulik",
     "license": "postgresql",
     "provides": {
@@ -10,16 +10,16 @@
             "abstract": "Openstreetmap PBF foreign data wrapper",
             "file": "sql/osm_fdw.sql",
             "docfile": "doc/osm_fdw.md",
-            "version": "1.0.2"
+            "version": "2.0.0"
         }
     },
     "prereqs": {
         "runtime": {
             "requires": {
-                "PostgreSQL": "9.3.0"
+                "PostgreSQL": "9.6.0"
             },
             "recommends": {
-                "PostgreSQL": "9.4.0"
+                "PostgreSQL": "9.6.0"
             }
         }
     },

@@ -1,13 +1,12 @@
 language: c
+dist: trusty
 
 addons:
   postgresql:
-    - 9.3
-    - 9.4
+    - 9.6
 
 env:
-  - PG_VERSION=9.3 PG_PORT=5432 PGUSER=postgres
-  - PG_VERSION=9.4 PG_PORT=5432 PGUSER=postgres
+  - PG_VERSION=9.6 PG_PORT=5432 PGUSER=postgres
 
 before_install:
   - sudo service postgresql stop
