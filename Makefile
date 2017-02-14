@@ -14,18 +14,14 @@ MODULE_big      = $(EXTENSION)
 #
 #MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
 PG_CONFIG    = pg_config
-PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
-PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
 
 TEST_DATABASE = osm_test_db
 TEST_PORT = 5432
 
-#ifeq ($(PG94),yes)
 
 DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
 EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 
-#endif
 
 CURRENT_FOLDER = $(shell pwd)
 READER_FOLDER = $(CURRENT_FOLDER)/src/osm_reader
@@ -35,10 +31,10 @@ CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 FC = -g -fpic
 #F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
 F_Z = $(shell pkg-config --cflags zlib)
-F_JSON = $(shell pkg-config --cflags json)
+F_JSON = $(shell pkg-config --cflags json-c)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-F_LD = $(shell pkg-config --libs json)
+F_LD = $(shell pkg-config --libs json-c)
 #F_LD += $(shell pkg-config --libs libprotobuf-c)
 F_LD += -lprotobuf-c
 F_LD += $(shell pkg-config --libs zlib)
@@ -49,15 +45,8 @@ OBJS += type_defs.o
 OBJS += zdecode.o
 OBJS += fileformat.pb-c.o
 OBJS += osmformat.pb-c.o
-ifeq ($(PG94), yes)
-ENV_VARS += -DUSE_JSONB
 OBJS += jsonb_encode.o
 UTILS_FILE = sql/utils-9.4.sql
-else
-ENV_VARS += -DUSE_LIBJSONC
-OBJS += json_encode.o
-UTILS_FILE = sql/utils-9.3.sql
-endif
 OBJS += osm_fdw.o
 
 EXTRA_CLEAN += $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/fileformat.pb-c.h
