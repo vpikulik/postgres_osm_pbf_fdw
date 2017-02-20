@@ -20,7 +20,7 @@ SELECT create_osm_table('osm_malta', 'osm_fdw_server', '/path_to_file/malta-late
 SELECT count(*) FROM osm_malta WHERE type='NODE';
 ```
 
-Find more examples here: [examples](https://github.com/vpikulik/postgres_osm_pbf_fdw/tree/master/examples "Openstreetmap foreign data wrapper examples")
+Find more examples here: [examples](https://github.com/vpikulik/postgres_osm_pbf_fdw/tree/master/ "Openstreetmap foreign data wrapper examples")
 
 ## How to use
 
@@ -29,22 +29,22 @@ Create extension at first:
 CREATE EXTENSION osm_fdw;
 ```
 
-To access foreign data, you need to create a [foreign server object](http://www.postgresql.org/docs/9.4/static/ddl-foreign-data.html "Postgresql foreign server object"):
+To access foreign data, you need to create a [foreign server object](http://www.postgresql.org/docs/9.6/static/ddl-foreign-data.html "Postgresql foreign server object"):
 ```sql
 CREATE SERVER osm_fdw_server FOREIGN DATA WRAPPER osm_fdw;
 ```
 
-Next you should create [foreign table](http://www.postgresql.org/docs/9.4/static/sql-createforeigntable.html). 
-There are two ways: `CREATE FOREIGN TABLE` query and `create_osm_table` function.
-I strongly recommend to use second method.
-The function `create_osm_table(text, text, text)` is provided together with the extension.
-It requires 3 parameters: a name of the table, a name of the foreign server object and a path to *.osm.pbf file.
+Then create [foreign table](http://www.postgresql.org/docs/9.6/static/sql-createforeigntable.html). 
+There are two options: `CREATE FOREIGN TABLE` query and `create_osm_table` function.
+I would strongly recommend to use second method.
+The function `create_osm_table(text, text, text)` is provided together with this extension.
+It requires 3 parameters: name of the table, name of the foreign server object and a path to *.osm.pbf file.
 ```sql
 SELECT create_osm_table('table_name', 'osm_fdw_server', '/path_to_file/file.osm.pbf');
 ```
 
-FDW start to read the file with every query.
-I would recommend to create [materialized view](http://www.postgresql.org/docs/9.4/static/rules-materializedviews.html "Postgresql materialized view") to fast data access.
+FDW reads the file with every query.
+The right approach is to copy data to postgresql table or [materialized view](http://www.postgresql.org/docs/9.6/static/rules-materializedviews.html "Postgresql materialized view"), create required indexes and query this table or view.
 ```sql
 CREATE MATERIALIZED VIEW osm_data AS SELECT * FROM osm_foreign_table WITH DATA;
 ```
@@ -80,12 +80,12 @@ Fields can have other names, but position and types must be as in this example.
 The FDW can read 3 openstreetmap types: ([NODE](http://wiki.openstreetmap.org/wiki/Node "Node")), ([WAY](http://wiki.openstreetmap.org/wiki/Way "Way")) and ([RELATION](http://wiki.openstreetmap.org/wiki/Relation "Relation")).
 
     * `id` - OSM object id
-    * `type` - type of the object (Values: NODE, WAY, RELATION)
-    * `lat` - latitude (not empty only for NODE)
-    * `lon` - longitude (not empty only for NODE type)
-    * `tags` - json object with OSM tags (json for postgres 9.3 and jsonb for 9.4)
-    * `refs` - array on node ids (not empty only for WAY)
-    * `members` - array of objects with relation members (not empty only for RELATION; json for postgres 9.3 and jsonb for 9.4)
+    * `type` - type of the object (Possible values: NODE, WAY, RELATION)
+    * `lat` - latitude (filled only for NODE)
+    * `lon` - longitude (filled only for NODE)
+    * `tags` - jsonb object with OSM tags
+    * `refs` - array on node ids (filled only for WAY)
+    * `members` - array of objects with relation members (jsonb)
     * `version` - OSM version
     * `modified` - OSM last change date
     * `changeset` - OSM changeset

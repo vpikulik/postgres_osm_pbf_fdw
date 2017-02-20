@@ -6,7 +6,7 @@ This extension for PostgreSQL implements [Foreign Data Wrapper](https://wiki.pos
 
 ## Requirements
 
-    * postgresql version 9.3 or 9.4
+    * postgresql version 9.6
     * libprotobuf-c
     * json-c >= 0.11
     * zlib
@@ -20,23 +20,6 @@ sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c2 libprotobuf-
 sudo make install
 ```
 
-### How to install in Ubuntu 12.04
-
-Install [json-c](https://github.com/json-c/json-c/tree/json-c-0.11 "json-c") at first (Ubuntu 12.04 has the old version)
-```bash
-git clone https://github.com/json-c/json-c.git
-cd json-c
-git checkout json-c-0.11
-```
-
-Compile and install osm_fdw
-```
-sh autogen.sh
-./configure
-make
-sudo make install
-```
-
 ### Install with PGXN
 
 Install required packages before and next run:
@@ -45,9 +28,9 @@ sudo pgxn install osm_fdw
 ```
 
 ### Addition parameters
-If you want to use not default version of postgres in you system, you can specify `pg_config`
+If you want to use not default version of postgres in your system, you can specify `pg_config`
 ```bash
-sudo make PG_CONFIG=/usr/lib/postgresql/9.4/bin/pg_config install
+sudo make PG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config install
 ```
 
 ## Documentation
