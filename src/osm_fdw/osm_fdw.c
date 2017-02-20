@@ -19,14 +19,8 @@ PG_MODULE_MAGIC;
 
 
 #include "osm_reader.h"
-#ifdef USE_LIBJSONC
-#include "utils/json.h"
-#include "json_encode.h"
-#endif
-#ifdef USE_JSONB
 #include "utils/jsonb.h"
 #include "jsonb_encode.h"
-#endif
 
 
 typedef struct FdwExecutionState
@@ -102,10 +96,12 @@ GetForeignPaths (PlannerInfo *root,
         (Path *) create_foreignscan_path(
             root,
             baserel,
+            NULL,
             baserel->rows,
             startup_cost,
             total_cost,
             NIL,
+            NULL,
             NULL,
             baserel->fdw_private
         )
@@ -118,7 +114,8 @@ GetForeignPlan (PlannerInfo *root,
                 Oid foreigntableid,
                 ForeignPath *best_path,
                 List *tlist,
-                List *scan_clauses) {
+                List *scan_clauses,
+                Plan *outer_plan) {
 
     scan_clauses = extract_actual_clauses(scan_clauses, false);
 
@@ -127,7 +124,10 @@ GetForeignPlan (PlannerInfo *root,
         scan_clauses,
         baserel->relid,
         NIL,
-        best_path->fdw_private);
+        best_path->fdw_private,
+        NIL,
+        NIL,
+        outer_plan);
 };
 
 void
@@ -196,19 +196,9 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->tags_count > 0) {
-        #ifdef USE_LIBJSONC
-        char *tags_json = encode_tags(item);
-        text *tags_text = cstring_to_text(tags_json);
-        slot->tts_values[4] = PointerGetDatum(tags_text);
-        slot->tts_isnull[4] = false;
-        free(tags_json);
-        #endif
-
-        #ifdef USE_JSONB
         Jsonb *jtags = jsonb_encode_tags(item);
         slot->tts_values[4] = PointerGetDatum(jtags);
         slot->tts_isnull[4] = false;
-        #endif
     } else {
         slot->tts_values[4] = PointerGetDatum(NULL);
         slot->tts_isnull[4] = true;
@@ -230,19 +220,9 @@ IterateForeignScan (ForeignScanState *node){
     }
 
     if (item->members_count > 0) {
-        #ifdef USE_LIBJSONC
-        char *members_json = encode_members(item);
-        text *members_text = cstring_to_text(members_json);
-        slot->tts_values[6] = PointerGetDatum(members_text);
-        slot->tts_isnull[6] = false;
-        free(members_json);
-        #endif
-
-        #ifdef USE_JSONB
         Jsonb *jmembers = jsonb_encode_members(item);
         slot->tts_values[6] = PointerGetDatum(jmembers);
         slot->tts_isnull[6] = false;
-        #endif
     } else {
         slot->tts_values[6] = PointerGetDatum(NULL);
         slot->tts_isnull[6] = true;

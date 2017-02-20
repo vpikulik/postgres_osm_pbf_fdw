@@ -14,18 +14,14 @@ MODULE_big      = $(EXTENSION)
 #
 #MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
 PG_CONFIG    = pg_config
-PG93         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.4" && echo no || echo yes)
-PG94         = $(shell $(PG_CONFIG) --version | grep -qE " 8\.| 9\.0| 9\.1 | 9\.2| 9\.2| 9\.3" && echo no || echo yes)
 
 TEST_DATABASE = osm_test_db
 TEST_PORT = 5432
 
-#ifeq ($(PG94),yes)
 
 DATA = $(wildcard sql/*--*.sql) sql/$(EXTENSION)--$(EXTVERSION).sql
 EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 
-#endif
 
 CURRENT_FOLDER = $(shell pwd)
 READER_FOLDER = $(CURRENT_FOLDER)/src/osm_reader
@@ -35,10 +31,10 @@ CONVERTER_FOLDER = $(CURRENT_FOLDER)/src/osm_convert
 FC = -g -fpic
 #F_PROTO = $(shell pkg-config --cflags libprotobuf-c)
 F_Z = $(shell pkg-config --cflags zlib)
-F_JSON = $(shell pkg-config --cflags json)
+F_JSON = $(shell pkg-config --cflags json-c)
 F_PG = -I$(shell $(PG_CONFIG) --includedir-server)
 
-F_LD = $(shell pkg-config --libs json)
+F_LD = $(shell pkg-config --libs json-c)
 #F_LD += $(shell pkg-config --libs libprotobuf-c)
 F_LD += -lprotobuf-c
 F_LD += $(shell pkg-config --libs zlib)
@@ -49,16 +45,10 @@ OBJS += type_defs.o
 OBJS += zdecode.o
 OBJS += fileformat.pb-c.o
 OBJS += osmformat.pb-c.o
-ifeq ($(PG94), yes)
-ENV_VARS += -DUSE_JSONB
 OBJS += jsonb_encode.o
-UTILS_FILE = sql/utils-9.4.sql
-else
-ENV_VARS += -DUSE_LIBJSONC
-OBJS += json_encode.o
-UTILS_FILE = sql/utils-9.3.sql
-endif
 OBJS += osm_fdw.o
+
+UTILS_FILE = sql/utils.sql
 
 EXTRA_CLEAN += $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/fileformat.pb-c.h
 EXTRA_CLEAN += $(READER_FOLDER)/osmformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.h
@@ -66,8 +56,6 @@ EXTRA_CLEAN += json_encode.o jsonb_encode.o
 EXTRA_CLEAN += osm_to_json.o osm_to_json
 EXTRA_CLEAN += osm_count.o osm_count
 EXTRA_CLEAN += /tmp/monaco.osm.pbf
-
-build_all: sql/$(EXTENSION)--$(EXTVERSION).sql all
 
 test: /tmp/monaco.osm.pbf
 	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
@@ -106,7 +94,7 @@ jsonb_encode.o:
 osm_reader.o: $(READER_FOLDER)/fileformat.pb-c.c $(READER_FOLDER)/osmformat.pb-c.c
 	gcc -c $(FC) $(READER_FOLDER)/osm_reader.c
 
-osm_fdw.o:
+osm_fdw.o: sql/$(EXTENSION)--$(EXTVERSION).sql
 	gcc -c $(FC) $(F_PG) $(F_JSON) $(ENV_VARS) -I$(READER_FOLDER) $(FDW_FOLDER)/osm_fdw.c
 
 CONVERTER_OBJS = osm_reader.o
