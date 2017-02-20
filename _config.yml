@@ -1,0 +1,8 @@
+title: Postgres osm pbf fdw
+description: OSM PBF Foreign Data Wrapper
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
