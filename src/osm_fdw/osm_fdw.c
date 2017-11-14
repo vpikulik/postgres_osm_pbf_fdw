@@ -271,6 +271,8 @@ EndForeignScan (ForeignScanState *node) {
     fclose(state->file);
 };
 
+PG_FUNCTION_INFO_V1(osm_fdw_handler);
+
 Datum
 osm_fdw_handler(PG_FUNCTION_ARGS)
 {
