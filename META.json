@@ -19,7 +19,7 @@
                 "PostgreSQL": "9.6.0"
             },
             "recommends": {
-                "PostgreSQL": "10"
+                "PostgreSQL": "10.0.0"
             }
         }
     },
