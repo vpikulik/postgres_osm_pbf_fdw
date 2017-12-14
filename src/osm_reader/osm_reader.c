@@ -356,10 +356,10 @@ OsmItem* read_osm_item(Cursor* cursor, FILE* file, file_size_t file_size) {
         return NULL;
     }
 
-    if (cursor->position < cursor->items_count - 1) {
+    if (cursor->position < cursor->items_count) {
         OsmItem* item = cursor->items[cursor->position];
         cursor->position ++;
-        if (cursor->position >= cursor->items_count - 1) {
+        if (cursor->position >= cursor->items_count) {
             cursor->position = -1;
         }
         return item;

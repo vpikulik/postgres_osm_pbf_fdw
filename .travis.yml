@@ -31,5 +31,4 @@ before_script:
   - sudo make install
 
 script:
-  - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db |& tee /tmp/pgprove.log
-  - "grep -q '^Result: PASS' /tmp/pgprove.log"
+  - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db

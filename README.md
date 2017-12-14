@@ -6,17 +6,17 @@ This extension for PostgreSQL implements [Foreign Data Wrapper](https://wiki.pos
 
 ## Requirements
 
-    * postgresql version 9.6
+    * postgresql version => 9.6 (tested with 9.6 and 10)
     * libprotobuf-c
     * json-c >= 0.11
     * zlib
 
 ## Install
 
-### How to install in Debian 8
+### How to install in Debian 9
 
 ```bash
-sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c2 libprotobuf-c-dev libprotobuf-c-compiler libprotobuf-c1 zlib1g-dev zlib1g
+sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c3 libprotobuf-c-dev libprotobuf-c-compiler libprotobuf-c1 zlib1g-dev zlib1g
 sudo make install
 ```
 
@@ -30,7 +30,7 @@ sudo pgxn install osm_fdw
 ### Addition parameters
 If you want to use not default version of postgres in your system, you can specify `pg_config`
 ```bash
-sudo make PG_CONFIG=/usr/lib/postgresql/9.6/bin/pg_config install
+sudo make PG_CONFIG=/usr/lib/postgresql/10/bin/pg_config install
 ```
 
 ## Documentation

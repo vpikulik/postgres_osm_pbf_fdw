@@ -37,10 +37,10 @@ BEGIN;
 SELECT plan(4 + 11 + 11 + 11);
 
 -- check rows count
-SELECT ok(19736 = (SELECT count(*) FROM osm_test_monaco));
-SELECT ok(17231 = (SELECT count(*) FROM osm_test_monaco WHERE type='NODE'));
+SELECT ok(19739 = (SELECT count(*) FROM osm_test_monaco));
+SELECT ok(17233 = (SELECT count(*) FROM osm_test_monaco WHERE type='NODE'));
 SELECT ok(2398 = (SELECT count(*) FROM osm_test_monaco WHERE type='WAY'));
-SELECT ok(107 = (SELECT count(*) FROM osm_test_monaco WHERE type='RELATION'));
+SELECT ok(108 = (SELECT count(*) FROM osm_test_monaco WHERE type='RELATION'));
 
 -- check NODE
 SELECT is('43.7370786', (SELECT lat FROM osm_test_monaco WHERE id=1681897931 AND type='NODE')::text);

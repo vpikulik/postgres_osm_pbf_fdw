@@ -29,12 +29,12 @@ Create extension at first:
 CREATE EXTENSION osm_fdw;
 ```
 
-To access foreign data, you need to create a [foreign server object](http://www.postgresql.org/docs/9.6/static/ddl-foreign-data.html "Postgresql foreign server object"):
+To access foreign data, you need to create a [foreign server object](http://www.postgresql.org/docs/10/static/ddl-foreign-data.html "Postgresql foreign server object"):
 ```sql
 CREATE SERVER osm_fdw_server FOREIGN DATA WRAPPER osm_fdw;
 ```
 
-Then create [foreign table](http://www.postgresql.org/docs/9.6/static/sql-createforeigntable.html). 
+Then create [foreign table](http://www.postgresql.org/docs/10/static/sql-createforeigntable.html). 
 There are two options: `CREATE FOREIGN TABLE` query and `create_osm_table` function.
 I would strongly recommend to use second method.
 The function `create_osm_table(text, text, text)` is provided together with this extension.
@@ -44,7 +44,7 @@ SELECT create_osm_table('table_name', 'osm_fdw_server', '/path_to_file/file.osm.
 ```
 
 FDW reads the file with every query.
-The right approach is to copy data to postgresql table or [materialized view](http://www.postgresql.org/docs/9.6/static/rules-materializedviews.html "Postgresql materialized view"), create required indexes and query this table or view.
+The right approach is to copy data to postgresql table or [materialized view](http://www.postgresql.org/docs/10/static/rules-materializedviews.html "Postgresql materialized view"), create required indexes and query this table or view.
 ```sql
 CREATE MATERIALIZED VIEW osm_data AS SELECT * FROM osm_foreign_table WITH DATA;
 ```
