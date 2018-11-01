@@ -1,4 +1,5 @@
 *.o
+*.bc
 *.pb-c.*
 *.so
 sql/osm_fdw--*.sql
