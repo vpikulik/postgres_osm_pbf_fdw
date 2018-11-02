@@ -26,6 +26,8 @@ EXTRA_CLEAN += src/osm_reader/fileformat.pb-c.c src/osm_reader/fileformat.pb-c.h
 EXTRA_CLEAN += src/osm_reader/osmformat.pb-c.c src/osm_reader/osmformat.pb-c.h
 EXTRA_CLEAN += /tmp/monaco.osm.pbf
 
+TEST_DATABASE = osm_test_db
+TEST_PORT = 5432
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
 	cat $< sql/utils.sql > $@
@@ -35,6 +37,13 @@ src/osm_reader/fileformat.pb-c.c:
 
 src/osm_reader/osmformat.pb-c.c:
 	make -C src/osm_reader osmformat.pb-c.c
+
+test: /tmp/monaco.osm.pbf
+	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
+
+/tmp/monaco.osm.pbf:
+	rm -rf /tmp/monaco.osm.pbf
+	cp data/monaco.osm.pbf /tmp/
 
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
