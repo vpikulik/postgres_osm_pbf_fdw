@@ -1,12 +1,11 @@
 language: c
-dist: trusty
 
 addons:
   postgresql:
-    - 9.6
+    - 11
   apt:
     packages:
-      - postgresql-server-dev-9.6
+      - postgresql-server-dev-11
       - libprotobuf-c0-dev
       - libprotobuf-c0
       - protobuf-c-compiler
@@ -16,11 +15,11 @@ addons:
       - libjson-c2
       - python-setuptools
       - libtap-parser-sourcehandler-pgtap-perl
-      - postgresql-9.6-pgtap
+      - postgresql-11-pgtap
 
 before_install:
   - sudo service postgresql stop
-  - sudo pg_ctlcluster 9.6 main start
+  - sudo pg_ctlcluster 11 main start
   - sudo pg_lsclusters
 
 install:

@@ -1,6 +1,6 @@
 
 pipeline:
-  test_extension:
+  test_extension_pg10:
     image: lot_deb9
     commands:
       - pg_ctlcluster 10 lot start
@@ -9,6 +9,23 @@ pipeline:
       - psql -c 'CREATE DATABASE osm_test_db;'
       - psql -d osm_test_db -c 'CREATE EXTENSION pgtap;'
 
+      - make clean
+      - make
+      - make install
+      - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db
+    when:
+      event: [pull_request]
+  test_extension_pg11:
+    image: lot_deb9_pg11
+    commands:
+      - pg_ctlcluster 11 lot start
+      - sudo -u postgres psql -c "CREATE USER root SUPERUSER;"
+      - sudo -u postgres psql -c "CREATE DATABASE root OWNER root;"
+      - psql -c 'CREATE DATABASE osm_test_db;'
+      - psql -d osm_test_db -c 'CREATE EXTENSION pgtap;'
+
+      - make clean
+      - make
       - make install
       - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db
     when:
