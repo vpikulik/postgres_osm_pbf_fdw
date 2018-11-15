@@ -9,6 +9,8 @@ pipeline:
       - psql -c 'CREATE DATABASE osm_test_db;'
       - psql -d osm_test_db -c 'CREATE EXTENSION pgtap;'
 
+      - make clean
+      - make
       - make install
       - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db
     when:
@@ -22,6 +24,8 @@ pipeline:
       - psql -c 'CREATE DATABASE osm_test_db;'
       - psql -d osm_test_db -c 'CREATE EXTENSION pgtap;'
 
+      - make clean
+      - make
       - make install
       - make test TEST_PORT=5432 TEST_DATABASE=osm_test_db
     when:
