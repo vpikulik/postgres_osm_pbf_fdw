@@ -12,6 +12,6 @@ steps:
     commands:
       - /docker-entrypoint.sh postgres &
       - apt -y update
-      - apt -y install postgresql-server-dev-10 libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c3 python-setuptools libtap-parser-sourcehandler-pgtap-perl postgresql-10-pgtap
-      - make install
+      - apt -y install make gcc postgresql-server-dev-10 libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c3 python-setuptools libtap-parser-sourcehandler-pgtap-perl postgresql-10-pgtap
+      - make clean && make && make install
       - make test TEST_PORT=5432 TEST_USER=tst TEST_DATABASE=osm_test_db
