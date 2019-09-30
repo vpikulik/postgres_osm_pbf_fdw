@@ -13,6 +13,25 @@ steps:
       - /docker-entrypoint.sh postgres &
       - apt -y update
       - apt -y install make gcc libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c3 python-setuptools libtap-parser-sourcehandler-pgtap-perl postgresql-server-dev-10 postgresql-10-pgtap
-      - psql -U tst -d fdw_test -c 'CREATE EXTENSION pgtap;' 
+      - psql -U tst -d fdw_test -c 'CREATE EXTENSION pgtap;'
+      - make clean && make && make install
+      - make test TEST_PORT=5432 TEST_USER=tst TEST_DATABASE=fdw_test
+
+---
+kind: pipeline
+name: osm_fdw_pg11
+steps:
+  - name: default
+    image: postgres:11
+    environment:
+      POSTGRES_USER: tst
+      POSTGRES_PASSWORD: tst
+      POSTGRES_DB: fdw_test
+      PGPASSWORD: tst
+    commands:
+      - /docker-entrypoint.sh postgres &
+      - apt -y update
+      - apt -y install make gcc libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c3 python-setuptools libtap-parser-sourcehandler-pgtap-perl postgresql-server-dev-10 postgresql-10-pgtap
+      - psql -U tst -d fdw_test -c 'CREATE EXTENSION pgtap;'
       - make clean && make && make install
       - make test TEST_PORT=5432 TEST_USER=tst TEST_DATABASE=fdw_test
