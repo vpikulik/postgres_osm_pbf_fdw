@@ -5,6 +5,7 @@
 #include "foreign/fdwapi.h"
 #include "foreign/foreign.h"
 #include "optimizer/cost.h"
+#include "optimizer/optimizer.h" // cpu_tuple_cost
 #include "optimizer/pathnode.h" // create_foreignscan_path
 #include "optimizer/planmain.h" // make_foreignscan
 #include "optimizer/restrictinfo.h" // extract_actual_clauses
@@ -14,6 +15,8 @@
 #include "utils/timestamp.h"
 #include "access/reloptions.h" // untransformRelOptions
 #include "catalog/pg_foreign_table.h" // ForeignTableRelationId
+
+
 
 PG_MODULE_MAGIC;
 
