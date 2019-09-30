@@ -28,6 +28,7 @@ EXTRA_CLEAN += /tmp/monaco.osm.pbf
 
 TEST_DATABASE = osm_test_db
 TEST_PORT = 5432
+TEST_USER = tst
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
 	cat $< sql/utils.sql > $@
@@ -39,7 +40,7 @@ src/osm_reader/osmformat.pb-c.c:
 	make -C src/osm_reader osmformat.pb-c.c
 
 test: /tmp/monaco.osm.pbf
-	pg_prove -p $(TEST_PORT) -d $(TEST_DATABASE) tests/smoke.sql
+	pg_prove -p $(TEST_PORT) -U $(TEST_USER) -d $(TEST_DATABASE) tests/smoke.sql
 
 /tmp/monaco.osm.pbf:
 	rm -rf /tmp/monaco.osm.pbf
