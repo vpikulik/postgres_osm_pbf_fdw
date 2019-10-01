@@ -1,5 +1,7 @@
 
 .DEFAULT_GOAL := all
+SHELL = /bin/bash
+PG_CONFIG = pg_config
 
 MODULE_big = osm_fdw
 
@@ -18,7 +20,17 @@ EXTVERSION   = $(shell grep default_version $(EXTENSION).control | sed -e "s/def
 
 DATA_built = sql/$(EXTENSION)--$(EXTVERSION).sql
 
-PG_CPPFLAGS = -Isrc/osm_reader
+ifeq ($(shell $(PG_CONFIG) --version | grep -q "PostgreSQL 10" && echo yes), yes)
+PG_VERSION = 10
+endif
+ifeq ($(shell $(PG_CONFIG) --version | grep -q "PostgreSQL 11" && echo yes), yes)
+PG_VERSION = 11
+endif
+ifeq ($(shell $(PG_CONFIG) --version | grep -q "PostgreSQL 12" && echo yes), yes)
+PG_VERSION = 12
+endif
+
+PG_CPPFLAGS = -Isrc/osm_reader -DPGV=$(PG_VERSION)
 SHLIB_LINK = -lprotobuf-c $(shell pkg-config --libs json-c) $(shell pkg-config --libs zlib)
 
 EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
@@ -29,6 +41,7 @@ EXTRA_CLEAN += /tmp/monaco.osm.pbf
 TEST_DATABASE = osm_test_db
 TEST_PORT = 5432
 TEST_USER = tst
+
 
 sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
 	cat $< sql/utils.sql > $@
@@ -45,6 +58,9 @@ test: /tmp/monaco.osm.pbf
 /tmp/monaco.osm.pbf:
 	rm -rf /tmp/monaco.osm.pbf
 	cp data/monaco.osm.pbf /tmp/
+
+ver:
+	echo $(PG_VERSION)
 
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)

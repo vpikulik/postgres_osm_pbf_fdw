@@ -5,7 +5,6 @@
 #include "foreign/fdwapi.h"
 #include "foreign/foreign.h"
 #include "optimizer/cost.h"
-#include "optimizer/optimizer.h" // cpu_tuple_cost
 #include "optimizer/pathnode.h" // create_foreignscan_path
 #include "optimizer/planmain.h" // make_foreignscan
 #include "optimizer/restrictinfo.h" // extract_actual_clauses
@@ -16,6 +15,9 @@
 #include "access/reloptions.h" // untransformRelOptions
 #include "catalog/pg_foreign_table.h" // ForeignTableRelationId
 
+# if PGV == 12
+#include "optimizer/optimizer.h" // cpu_tuple_cost
+# endif
 
 
 PG_MODULE_MAGIC;
