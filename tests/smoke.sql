@@ -42,9 +42,11 @@ SELECT ok(17233 = (SELECT count(*) FROM osm_test_monaco WHERE type='NODE'));
 SELECT ok(2398 = (SELECT count(*) FROM osm_test_monaco WHERE type='WAY'));
 SELECT ok(108 = (SELECT count(*) FROM osm_test_monaco WHERE type='RELATION'));
 
+
+
 -- check NODE
-SELECT is('43.7370786', (SELECT lat FROM osm_test_monaco WHERE id=1681897931 AND type='NODE')::text);
-SELECT is('7.4171807', (SELECT lon FROM osm_test_monaco WHERE id=1681897931 AND type='NODE')::text);
+SELECT is(43.7370786::numeric, (SELECT lat::numeric FROM osm_test_monaco WHERE id=1681897931 AND type='NODE'));
+SELECT is(7.4171807::numeric, (SELECT lon::numeric FROM osm_test_monaco WHERE id=1681897931 AND type='NODE'));
 SELECT ok(eq_json(
     '{"amenity": "atm", "operator": "CFM"}'::json,
     (SELECT tags FROM osm_test_monaco WHERE id=1681897931 AND type='NODE')::json
