@@ -15,6 +15,11 @@
 #include "access/reloptions.h" // untransformRelOptions
 #include "catalog/pg_foreign_table.h" // ForeignTableRelationId
 
+# if PGV == 12
+#include "optimizer/optimizer.h" // cpu_tuple_cost
+# endif
+
+
 PG_MODULE_MAGIC;
 
 

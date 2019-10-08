@@ -6,7 +6,7 @@ This extension for PostgreSQL implements [Foreign Data Wrapper](https://wiki.pos
 
 ## Requirements
 
-    * postgresql version => 9.6 (tested with 9.6 and 10)
+    * postgresql version => 10
     * libprotobuf-c
     * json-c >= 0.11
     * zlib
