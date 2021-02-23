@@ -1,5 +1,5 @@
 # osm_fdw extension
 comment = 'osm fdw'
-default_version = '4.1.0'
+default_version = '4.1.1'
 module_pathname = '$libdir/osm_fdw'
 relocatable = true
