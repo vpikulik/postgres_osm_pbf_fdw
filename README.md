@@ -16,7 +16,7 @@ This extension for PostgreSQL implements [Foreign Data Wrapper](https://wiki.pos
 ### How to install in Debian 9
 
 ```bash
-sudo apt-get install postgresql-server-dev libjson-c-dev libjson-c3 libprotobuf-c-dev libprotobuf-c-compiler libprotobuf-c1 zlib1g-dev zlib1g
+sudo apt install libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c3 postgresql-server-dev-13
 sudo make install
 ```
 
