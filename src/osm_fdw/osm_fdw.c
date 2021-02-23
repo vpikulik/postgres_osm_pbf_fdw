@@ -15,7 +15,7 @@
 #include "access/reloptions.h" // untransformRelOptions
 #include "catalog/pg_foreign_table.h" // ForeignTableRelationId
 
-# if PGV == 12
+# if PGV == 12 || PGV == 13
 #include "optimizer/optimizer.h" // cpu_tuple_cost
 # endif
 
@@ -50,7 +50,11 @@ char* get_file_name(Oid foreigntableid) {
         if (strcmp(def->defname, "filename") == 0)
         {
             filename = defGetString(def);
+            # if PGV == 13
+            options = list_delete_cell(options, lc);
+            # else
             options = list_delete_cell(options, lc, prev);
+            # endif
             pfree(def);
             break;
         }
