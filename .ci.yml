@@ -88,7 +88,7 @@ steps:
       POSTGRES_DB: fdw_test
       PGPASSWORD: tst
     commands:
-      - /docker-entrypoint.sh postgres &
+      - /usr/local/bin/docker-entrypoint.sh postgres &
       - apt -y update
       - apt -y install make patch gcc libprotobuf-c-dev libprotobuf-c1 protobuf-c-compiler zlib1g-dev zlib1g libjson-c-dev libjson-c5 python-setuptools libtap-parser-sourcehandler-pgtap-perl postgresql-server-dev-14 pgxnclient
       - pgxn install pgTAP
