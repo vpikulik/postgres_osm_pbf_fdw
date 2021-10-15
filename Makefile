@@ -32,6 +32,9 @@ endif
 ifeq ($(shell $(PG_CONFIG) --version | grep -q "PostgreSQL 13" && echo yes), yes)
 PG_VERSION = 13
 endif
+ifeq ($(shell $(PG_CONFIG) --version | grep -q "PostgreSQL 14" && echo yes), yes)
+PG_VERSION = 14
+endif
 
 PG_CPPFLAGS = -Isrc/osm_reader -DPGV=$(PG_VERSION)
 SHLIB_LINK = -lprotobuf-c $(shell pkg-config --libs json-c) $(shell pkg-config --libs zlib)
@@ -68,3 +71,6 @@ ver:
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
+
+dist:
+	git archive --format zip --prefix=$(EXTENSION)-$(EXTVERSION)/ -o $(EXTENSION)-$(EXTVERSION).zip HEAD
